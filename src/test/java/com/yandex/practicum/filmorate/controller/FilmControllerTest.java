@@ -144,7 +144,7 @@ class FilmControllerTest {
         Film withoutLike = filmController.create(template);
 
         filmController.likeFilm(film.getId(), user.getId());
-        List<Film> films = filmController.getPopularFilms(null);
+        List<Film> films = filmController.getPopularFilms(null, null, null);
 
         assertNotNull(films);
         assertFalse(films.isEmpty());
@@ -156,7 +156,7 @@ class FilmControllerTest {
         Film withoutLike = filmController.create(template);
 
         filmController.likeFilm(film.getId(), user.getId());
-        List<Film> films = filmController.getPopularFilms("1");
+        List<Film> films = filmController.getPopularFilms(1, null, null);
 
         assertEquals(1, films.size());
         assertFalse(films.contains(withoutLike));

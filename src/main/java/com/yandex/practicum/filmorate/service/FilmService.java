@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.relational.core.sql.In;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -111,12 +113,20 @@ public class FilmService {
         return films;
     }
 
-    public List<Film> getMostPopularFilms(String countStr) {
-        int count = DEFAULT_COUNT_POPULAR_FILMS;
-        if (countStr != null) {
-            count = Integer.parseInt(countStr);
+    public List<Film> getMostPopularFilms(Integer count, Integer genreId, Integer year) {
+        if (genreId == null && year == null){
+            return filmStorage.getMostPopularFilms(count);
+        } else {
+            if (genresStorage.getGenres().get(genreId) == null){
+                log.warn("Жанр не найден.");
+                throw new ValidationException("Жанр не найден.");
+            }
+            if (year < CINEMA_BIRTHDAY.getYear() || year > LocalDate.now().getYear()){
+                log.warn("Год меньше {} или больше {}.", CINEMA_BIRTHDAY.getYear(), LocalDate.now().getYear());
+                throw new ValidationException("Год меньше " + CINEMA_BIRTHDAY.getYear() + " или больше " + LocalDate.now().getYear() + ".");
+            }
+            return filmStorage.getMostPopularFilmsWithGenreAndYear(count, genreId, year);
         }
-        return filmStorage.getMostPopularFilms(count);
     }
 
     private void validationFilm(Film film) {

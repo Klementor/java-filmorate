@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -113,7 +114,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getMostPopularFilms(int count) {
+    public List<Film> getMostPopularFilms(Integer count) {
         String select = "SELECT f.*, m.id AS mpa_id, m.name AS mpa_name\n" +
                 "FROM film AS f " +
                 "INNER JOIN mpa AS m ON f.mpa = m.id\n" +
@@ -125,6 +126,28 @@ public class FilmDbStorage implements FilmStorage {
         List<Film> films = jdbcTemplate.query(select, (rs, rowNum) -> makeFilm(rs), count);
         films.forEach(film -> {
             //  film.getGenres().addAll(genresDbStorage.getFilmGenres(film.getId()));
+            film.getLikes().addAll(getUserLikes(film.getId()));
+        });
+        return films;
+    }
+
+    @Override
+    public List<Film> getMostPopularFilmsWithGenreAndYear(Integer count, Integer genreId, Integer year) {
+        String select = "SELECT f.*, m.id AS mpa_id, m.name AS mpa_name " +
+                "FROM film AS f " +
+                "INNER JOIN mpa AS m ON f.mpa = m.id " +
+                "LEFT JOIN film_likes AS lk ON f.id = lk.film_id " +
+                "LEFT JOIN film_genre AS fg ON f.id = fg.film_id " +
+                "WHERE f.release_date >= ? AND f.release_date < ? AND fg.genre_id = ? " +
+                "GROUP BY f.id " +
+                "ORDER BY COUNT(lk.film_id) DESC " +
+                "LIMIT ?";
+        List<Film> films = jdbcTemplate.query(select, (rs, rowNum) -> makeFilm(rs), LocalDate.of(year, 1, 1),
+                                                                                    LocalDate.of(year, 1, 1).plusYears(1),
+                                                                                    genreId,
+                                                                                    count);
+        films.forEach(film -> {
+            film.getGenres().addAll(genresDbStorage.getFilmGenres(film.getId()));
             film.getLikes().addAll(getUserLikes(film.getId()));
         });
         return films;
