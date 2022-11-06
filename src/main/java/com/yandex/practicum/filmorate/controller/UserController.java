@@ -1,5 +1,6 @@
 package com.yandex.practicum.filmorate.controller;
 
+import com.yandex.practicum.filmorate.model.HistoryEvent;
 import com.yandex.practicum.filmorate.model.Film;
 import com.yandex.practicum.filmorate.model.User;
 import com.yandex.practicum.filmorate.service.UserService;
@@ -57,6 +58,11 @@ public class UserController {
     @GetMapping("/{id}/friends/common/{otherId}")
     public List<User> getCommonUserFriends(@PathVariable int id, @PathVariable int otherId) {
         return userService.getCommonFriends(id, otherId);
+    }
+
+    @GetMapping("/{id}/feed")
+    public List<HistoryEvent> getUserFeeds(@PathVariable int id) {
+        return userService.getFeeds(id);
     }
 
     @GetMapping("/{userId}/recommendations")

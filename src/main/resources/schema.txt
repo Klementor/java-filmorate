@@ -53,3 +53,12 @@ Table user_friends {
     (user_id, friend_id) [pk]
   }
 }
+
+Table history_event {
+ event_id int [pk]
+ user_id int [ref: > U.id]
+ event_type varchar[10]
+ operation varchar[10]
+ entity_id int
+ timestamp int
+}

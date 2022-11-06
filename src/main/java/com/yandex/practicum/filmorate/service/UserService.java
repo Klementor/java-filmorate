@@ -3,9 +3,11 @@ package com.yandex.practicum.filmorate.service;
 import com.yandex.practicum.filmorate.exeption.NotFoundException;
 import com.yandex.practicum.filmorate.exeption.ValidationException;
 import com.yandex.practicum.filmorate.model.Film;
+import com.yandex.practicum.filmorate.model.HistoryEvent;
 import com.yandex.practicum.filmorate.model.User;
 import com.yandex.practicum.filmorate.storage.FilmStorage;
 import com.yandex.practicum.filmorate.storage.UserStorage;
+import com.yandex.practicum.filmorate.utils.Util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,12 +64,14 @@ public class UserService {
         User targetUser = getUser(targetUserId);
         User friend = getUser(friendId);
         userStorage.addToFriend(targetUser, friend);
+        userStorage.addHistoryEvent(targetUserId, "FRIEND", "ADD", friendId);
     }
 
     public void removeFromFriends(int targetUserId, int friendId) {
         User targetUser = getUser(targetUserId);
         User friend = getUser(friendId);
         userStorage.removeFromFriend(targetUser, friend);
+        userStorage.addHistoryEvent(targetUserId, "FRIEND", "REMOVE", friendId);
     }
 
     public List<User> getFriends(int userId) {
@@ -87,6 +91,11 @@ public class UserService {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
+    }
+
+    public List<HistoryEvent> getFeeds(int id) {
+        User user = getUser(id);
+        return userStorage.getFeeds(user.getId());
     }
 
     private void validationUser(User user) {

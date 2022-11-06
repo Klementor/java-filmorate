@@ -1,5 +1,6 @@
 package com.yandex.practicum.filmorate.storage.dao;
 
+import com.yandex.practicum.filmorate.model.HistoryEvent;
 import com.yandex.practicum.filmorate.model.User;
 import com.yandex.practicum.filmorate.storage.UserStorage;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Component;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -82,6 +85,20 @@ public class UserDbStorage implements UserStorage {
         jdbcTemplate.update(remove, targetUser.getId(), friend.getId());
     }
 
+    @Override
+    public List<HistoryEvent> getFeeds(int id) {
+        String select = "SELECT * " +
+                "FROM history_event " +
+                "WHERE user_id = ?";
+        return jdbcTemplate.query(select, (rs, rowNum) -> makeHistoryEvent(rs), id);
+    }
+
+    @Override
+    public void addHistoryEvent(int userId, String eventType, String operation, int entityId) {
+        String insert = "INSERT INTO history_event (user_id, event_type, operation, entity_id, timestamp) VALUES ( ?, ?, ?, ?, ?)";
+        jdbcTemplate.update(insert, userId, eventType, operation, entityId, Instant.now().getEpochSecond());
+    }
+
     private User makeUser(ResultSet rs) throws SQLException {
         int id = rs.getInt("id");
         User user = User.builder().id(id)
@@ -92,6 +109,15 @@ public class UserDbStorage implements UserStorage {
                 .build();
         user.getFriends().addAll(getUserFriends(id));
         return user;
+    }
+
+    private HistoryEvent makeHistoryEvent(ResultSet rs) throws SQLException {
+        return new HistoryEvent(rs.getInt("event_id"),
+                                rs.getInt("user_id"),
+                                rs.getString("event_type"),
+                                rs.getString("operation"),
+                                rs.getInt("entity_id"),
+                                rs.getInt("timestamp"));
     }
 
     @Override
