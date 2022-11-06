@@ -20,6 +20,10 @@ public interface FilmStorage {
 
     List<Film> getMostPopularFilmsWithGenreAndYear(Integer count, Integer genreId, Integer year);
 
+    List<Film> getMostPopularFilmsWithGenre(Integer count, Integer genreId);
+
+    List<Film> getMostPopularFilmsWithYear(Integer count, Integer year);
+
     void likeFilm(Film film, int userId);
 
     void unlikeFilm(Film film, int userId);

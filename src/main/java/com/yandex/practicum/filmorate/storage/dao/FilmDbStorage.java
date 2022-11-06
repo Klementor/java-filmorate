@@ -154,6 +154,47 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> getMostPopularFilmsWithGenre(Integer count, Integer genreId) {
+        String select = "SELECT f.*, m.id AS mpa_id, m.name AS mpa_name " +
+                "FROM film AS f " +
+                "INNER JOIN mpa AS m ON f.mpa = m.id " +
+                "LEFT JOIN film_likes AS lk ON f.id = lk.film_id " +
+                "LEFT JOIN film_genre AS fg ON f.id = fg.film_id " +
+                "WHERE fg.genre_id = ? " +
+                "GROUP BY f.id " +
+                "ORDER BY COUNT(lk.film_id) DESC " +
+                "LIMIT ?";
+        List<Film> films = jdbcTemplate.query(select, (rs, rowNum) -> makeFilm(rs), genreId,
+                                                                                    count);
+        films.forEach(film -> {
+            film.getGenres().addAll(genresDbStorage.getFilmGenres(film.getId()));
+            film.getLikes().addAll(getUserLikes(film.getId()));
+        });
+        return films;
+    }
+
+    @Override
+    public List<Film> getMostPopularFilmsWithYear(Integer count, Integer year) {
+        String select = "SELECT f.*, m.id AS mpa_id, m.name AS mpa_name " +
+                "FROM film AS f " +
+                "INNER JOIN mpa AS m ON f.mpa = m.id " +
+                "LEFT JOIN film_likes AS lk ON f.id = lk.film_id " +
+                "LEFT JOIN film_genre AS fg ON f.id = fg.film_id " +
+                "WHERE f.release_date >= ? AND f.release_date < ? " +
+                "GROUP BY f.id " +
+                "ORDER BY COUNT(lk.film_id) DESC " +
+                "LIMIT ?";
+        List<Film> films = jdbcTemplate.query(select, (rs, rowNum) -> makeFilm(rs), LocalDate.of(year, 1, 1),
+                                                                                    LocalDate.of(year, 1, 1).plusYears(1),
+                                                                                    count);
+        films.forEach(film -> {
+            film.getGenres().addAll(genresDbStorage.getFilmGenres(film.getId()));
+            film.getLikes().addAll(getUserLikes(film.getId()));
+        });
+        return films;
+    }
+
+    @Override
     public void likeFilm(Film film, int userId) {
         String insert = "INSERT INTO film_likes (user_id, film_id) VALUES ( ?, ?)";
         jdbcTemplate.update(insert, userId, film.getId());

@@ -116,6 +116,10 @@ public class FilmService {
     public List<Film> getMostPopularFilms(Integer count, Integer genreId, Integer year) {
         if (genreId == null && year == null){
             return filmStorage.getMostPopularFilms(count);
+        } else if (genreId == null) {
+            return filmStorage.getMostPopularFilmsWithYear(count, year);
+        } else if (year == null) {
+            return filmStorage.getMostPopularFilmsWithGenre(count, genreId);
         } else {
             if (genresStorage.getGenres().get(genreId) == null){
                 log.warn("Жанр не найден.");
