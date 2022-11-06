@@ -2,19 +2,20 @@ package com.yandex.practicum.filmorate.storage.dao;
 
 import com.yandex.practicum.filmorate.model.Film;
 import com.yandex.practicum.filmorate.model.Genre;
+import com.yandex.practicum.filmorate.model.Like;
 import com.yandex.practicum.filmorate.model.Mpa;
 import com.yandex.practicum.filmorate.storage.FilmStorage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component("filmStorage")
@@ -128,6 +129,11 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query(select, (rs, rowNum) -> rs.getInt("user_id"), filmId);
     }
 
+    public List<Like> getAllLikes() {
+        return jdbcTemplate.query("SELECT *" +
+                "FROM film_likes", new BeanPropertyRowMapper<>());
+    }
+
     private Film makeFilm(ResultSet rs) throws SQLException {
         int id = rs.getInt("id");
         Film film = Film.builder()
@@ -141,6 +147,6 @@ public class FilmDbStorage implements FilmStorage {
         film.getLikes().addAll(getUserLikes(id));
         film.getGenres().addAll(genresDbStorage.getFilmGenres(id));
         return film;
-
     }
+
 }

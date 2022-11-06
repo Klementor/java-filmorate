@@ -1,5 +1,6 @@
 package com.yandex.practicum.filmorate.controller;
 
+import com.yandex.practicum.filmorate.model.Film;
 import com.yandex.practicum.filmorate.model.User;
 import com.yandex.practicum.filmorate.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/users")
@@ -55,5 +57,10 @@ public class UserController {
     @GetMapping("/{id}/friends/common/{otherId}")
     public List<User> getCommonUserFriends(@PathVariable int id, @PathVariable int otherId) {
         return userService.getCommonFriends(id, otherId);
+    }
+
+    @GetMapping("/{userId}/recommendations")
+    public Set<Film> getRecommendationsFilms(@PathVariable int userId) {
+        return userService.getRecommendation(userId);
     }
 }
