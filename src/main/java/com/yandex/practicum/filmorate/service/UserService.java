@@ -159,12 +159,12 @@ public class UserService {
 
     private Map<Integer, Set<Integer>> initializeData() {
         Map<Integer, Set<Integer>> data = new HashMap<>();
-        filmStorage.getAllLikes().forEach(like -> {
-            if (!data.containsKey(like.getUserId())) {
-                data.put(like.getUserId(), new HashSet<>());
-            }
-            data.get(like.getUserId()).add(like.getFilmId());
-        });
+            filmStorage.getAllLikes().forEach(like -> {
+                if (!data.containsKey(like.getUserId())) {
+                    data.put(like.getUserId(), new HashSet<>());
+                }
+                data.get(like.getUserId()).add(like.getFilmId());
+            });
         return data;
     }
 

@@ -1,15 +1,10 @@
 package com.yandex.practicum.filmorate.storage.dao;
 
-import com.yandex.practicum.filmorate.model.Director;
-import com.yandex.practicum.filmorate.model.Film;
-import com.yandex.practicum.filmorate.model.Genre;
-import com.yandex.practicum.filmorate.model.Like;
-import com.yandex.practicum.filmorate.model.Mpa;
+import com.yandex.practicum.filmorate.model.*;
 import com.yandex.practicum.filmorate.storage.FilmStorage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -20,7 +15,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.*;
 import java.util.stream.Collectors;
 
 @Component("filmStorage")
@@ -213,7 +207,7 @@ public class FilmDbStorage implements FilmStorage {
 
     public List<Like> getAllLikes() {
         return jdbcTemplate.query("SELECT *" +
-                "FROM film_likes", new BeanPropertyRowMapper<>());
+                "FROM film_likes", new LikeMapper());
     }
 
     private Film makeFilm(ResultSet rs) throws SQLException {
@@ -235,5 +229,16 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void removeFilm(int filmId) {
         jdbcTemplate.update("DELETE FROM film WHERE ID=?", filmId);
+    }
+
+    static class LikeMapper implements RowMapper<Like> {
+
+        @Override
+        public Like mapRow(ResultSet rs, int rowNum) throws SQLException {
+            Like like = new Like();
+            like.setFilmId(rs.getInt("film_id"));
+            like.setUserId(rs.getInt("user_id"));
+            return like;
+        }
     }
 }
