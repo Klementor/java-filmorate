@@ -169,4 +169,11 @@ public class UserService {
     }
 
 
+
+    public void deleteUser(int userId) {
+        userStorage.getUserById(userId).orElseThrow(() -> {
+            throw new NotFoundException("Пользователя с id = " + userId + " не существует.");
+        });
+        userStorage.deleteUser(userId);
+    }
 }

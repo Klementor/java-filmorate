@@ -23,5 +23,7 @@ public interface FilmStorage {
 
     List<Film> getSortedFilms(int directorId, String sortBy);
 
+    void removeFilm(int filmId);
+
     List<Like> getAllLikes();
 }

@@ -127,9 +127,10 @@ public class FilmDbStorage implements FilmStorage {
                 "GROUP BY f.id, fl.user_id " +
                 "ORDER BY COUNT(fl.user_id) DESC " +
                 "LIMIT ?";
+
         List<Film> films = jdbcTemplate.query(select, (rs, rowNum) -> makeFilm(rs), count);
         films.forEach(film -> {
-            film.getGenres().addAll(genresDbStorage.getFilmGenres(film.getId()));
+            //  film.getGenres().addAll(genresDbStorage.getFilmGenres(film.getId()));
             film.getLikes().addAll(getUserLikes(film.getId()));
         });
         return films;
@@ -228,6 +229,11 @@ public class FilmDbStorage implements FilmStorage {
         film.getLikes().addAll(getUserLikes(id));
         film.getGenres().addAll(genresDbStorage.getFilmGenres(id));
         return film;
+
     }
 
+    @Override
+    public void removeFilm(int filmId) {
+        jdbcTemplate.update("DELETE FROM film WHERE ID=?", filmId);
+    }
 }
