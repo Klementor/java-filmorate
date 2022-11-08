@@ -80,7 +80,7 @@ public class UserService {
     public List<User> getCommonFriends(int targetUserId, int otherUserId) {
         User targetUser = getUser(targetUserId);
         User otherUser = getUser(otherUserId);
-        return   targetUser.getFriends().stream().filter(id -> otherUser.getFriends().contains(id))
+        return targetUser.getFriends().stream().filter(id -> otherUser.getFriends().contains(id))
                 .map(userStorage::getUserById)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -119,5 +119,12 @@ public class UserService {
 
     private int generatedId() {
         return ++idGenerator;
+    }
+
+    public void deleteUser(int userId) {
+        userStorage.getUserById(userId).orElseThrow(() -> {
+            throw new NotFoundException("Пользователя с id = " + userId + " не существует.");
+        });
+        userStorage.deleteUser(userId);
     }
 }

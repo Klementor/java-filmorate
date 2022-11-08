@@ -21,4 +21,6 @@ public interface FilmStorage {
     void unlikeFilm(Film film, int userId);
 
     List<Film> getSortedFilms(int directorId, String sortBy);
+
+    void removeFilm(int filmId);
 }

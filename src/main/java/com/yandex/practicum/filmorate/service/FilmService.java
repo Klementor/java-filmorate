@@ -174,4 +174,11 @@ public class FilmService {
     private int generatedId() {
         return ++idGenerator;
     }
+
+    public void deleteFilm(int id) {
+        filmStorage.get(id).orElseThrow(() -> {
+            throw new NotFoundException("Фильма с id = " + id + " не существует.");
+        });
+        filmStorage.removeFilm(id);
+    }
 }
