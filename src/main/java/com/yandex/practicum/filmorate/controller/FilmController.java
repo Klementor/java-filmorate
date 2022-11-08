@@ -32,7 +32,7 @@ public class FilmController {
 
     @GetMapping("/search")
     @ResponseBody
-    public List<Film> search(@RequestParam String query, Optional<String> by) {
+    public List<Film> search(@RequestParam String query, @RequestParam Optional<String> by) {
         return filmService.search(query, by.orElse(null));
     }
 
@@ -61,4 +61,8 @@ public class FilmController {
         return filmService.getMostPopularFilms(count);
     }
 
+    @GetMapping("/director/{directorId}")
+    public List<Film> getSortedFilms(@PathVariable int directorId, @RequestParam String sortBy) {
+        return filmService.getSortedFilms(directorId, sortBy);
+    }
 }

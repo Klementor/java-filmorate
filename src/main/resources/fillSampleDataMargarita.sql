@@ -25,6 +25,8 @@ INSERT INTO "USER_FRIENDS" (USER_ID, FRIENDS_ID)
 VALUES(4,1);
 
 
+INSERT INTO mpa (name) VALUES ('G'), ('PG'), ('PG-13'), ('R'), ('NC-17');
+INSERT INTO genre (name) VALUES ('Комедия'), ('Драма'), ('Мультфильм'), ('Триллер'), ('Документальный'), ('Боевик');
 
 INSERT INTO "FILM_GENRE" -- добавляем одновременно жанр фильма и сам фильм
 (GENRE_ID, FILM_ID)
@@ -88,3 +90,12 @@ INSERT INTO "FILM_LIKES" -- добавляем лайк фильму Дикая 
 (USER_ID, FILM_ID)
 VALUES(SELECT ID FROM "USERS"  WHERE EMAIL = 'petya@gmail.com',
           SELECT ID FROM "FILM"  WHERE NAME = 'Дикая природа Амазонки');
+
+INSERT INTO "DIRECTOR"
+(DIRECTOR_NAME)
+VALUES('НоЛан'), ('Петров'), ('Иванов');
+
+INSERT INTO "DIRECTORS"
+(FILM_ID, DIRECTOR_ID)
+VALUES(1, 1), (2,2), (3,3), (4,3), (5,1);
+

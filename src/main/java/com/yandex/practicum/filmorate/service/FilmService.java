@@ -5,15 +5,12 @@ import com.yandex.practicum.filmorate.exeption.ValidationException;
 import com.yandex.practicum.filmorate.model.Film;
 import com.yandex.practicum.filmorate.model.Genre;
 import com.yandex.practicum.filmorate.model.Mpa;
-import com.yandex.practicum.filmorate.storage.FilmStorage;
-import com.yandex.practicum.filmorate.storage.GenresStorage;
-import com.yandex.practicum.filmorate.storage.MpaStorage;
-import com.yandex.practicum.filmorate.storage.UserStorage;
+import com.yandex.practicum.filmorate.storage.*;
 import com.yandex.practicum.filmorate.utils.Util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -35,6 +32,8 @@ public class FilmService {
 
     private final MpaStorage mpaStorage;
     private final GenresStorage genresStorage;
+
+    private final DirectorStorage directorStorage;
     private int idGenerator = 0;
 
     public Film createFilm(Film film) {
@@ -48,7 +47,6 @@ public class FilmService {
                 });
 
         fillFilmGenres(film);
-
         film.setId(generatedId());
         film.setMpa(mpa);
         return filmStorage.create(film);
@@ -132,7 +130,12 @@ public class FilmService {
     }
 
     public List<Film> getFilms() {
-        return filmStorage.getFilms();
+        List<Film> films = filmStorage.getFilms();
+        for (Film film : films) {
+            film.getGenres().addAll(genresStorage.getFilmGenres(film.getId()));
+            film.getDirectors().addAll(directorStorage.getDirectorByFilmId(film.getId()));
+        }
+        return films;
     }
 
     public List<Film> getMostPopularFilms(String countStr) {
@@ -187,6 +190,14 @@ public class FilmService {
         }
     }
 
+    public List<Film> getSortedFilms(int directorId, String sortBy) {
+        try {
+            directorStorage.getDirectorById(directorId);
+            return filmStorage.getSortedFilms(directorId, sortBy);
+        } catch (EmptyResultDataAccessException e) {
+            throw new NotFoundException("Режиссера с таким id не существует");
+        }
+    }
     private int generatedId() {
         return ++idGenerator;
     }

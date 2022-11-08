@@ -1,21 +1,16 @@
 package com.yandex.practicum.filmorate.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NonNull;
-import org.springframework.data.relational.core.sql.In;
+import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class Film {
     private int id;
@@ -29,6 +24,7 @@ public class Film {
     private int duration;
     @NonNull
     private Mpa mpa;
+    private final Set<Director> directors = new HashSet<>();
     private final Set<Integer> likes = new HashSet<>();
-    private final List<Genre> genres = new ArrayList<>();
+    private final Set<Genre> genres = new HashSet<>();
 }
