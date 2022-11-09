@@ -31,12 +31,17 @@ public class ReviewsService {
         filmStorage.get(review.getFilmId()).orElseThrow(() -> {
             throw new NotFoundException("Фильм с id = " + review.getFilmId() + " не существует.");
         });
-        return reviewsStorage.create(review);
+
+        Review reviewReturned = reviewsStorage.create(review);
+        userStorage.addHistoryEvent(review.getUserId(), "REVIEW", "ADD", reviewReturned.getReviewId());
+        return reviewReturned;
     }
 
     public Review updateReview(Review review) {
         validationReview(review);
-        return reviewsStorage.update(review);
+        Review reviewReturned = reviewsStorage.update(review);
+        userStorage.addHistoryEvent(review.getUserId(), "REVIEW", "UPDATE", reviewReturned.getReviewId());
+        return reviewReturned;
     }
 
     public Review getReview(int id) {
@@ -46,7 +51,9 @@ public class ReviewsService {
     }
 
     public Review delete(int id) {
-        return reviewsStorage.deleteReviewById(id);
+        Review reviewReturned = reviewsStorage.deleteReviewById(id);
+        userStorage.addHistoryEvent(reviewReturned.getUserId(), "REVIEW", "REMOVE", reviewReturned.getReviewId());
+        return reviewReturned;
     }
 
     public List<Review> getReviewsByFilm(String filmIdStr, String countStr) {
