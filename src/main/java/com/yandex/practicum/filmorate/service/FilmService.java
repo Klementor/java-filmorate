@@ -17,9 +17,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -54,6 +54,33 @@ public class FilmService {
         return filmStorage.create(film);
     }
 
+    public List<Film> search(String query, String by) {
+        Map<String, Boolean> queryParams = parseQueryBy(by);
+        if (query != null && !query.isEmpty()) {
+            return filmStorage.search(query, queryParams.get("director"), queryParams.get("title"));
+        } else {
+            log.warn("film search query is empty.");
+            return new ArrayList<>();
+        }
+    }
+
+    private  Map<String,Boolean>  parseQueryBy(String by) {
+        int maximumParametersSize =2;
+        Map<String,Boolean> parameters = new HashMap<>();
+        if (by != null) {
+            String[] strings = by.split(",");
+            if ( strings.length > maximumParametersSize) {
+                throw new ValidationException("chosen search fields contains more parameters than expected");
+            }
+            parameters.put("director", Arrays.stream(strings).anyMatch(x->x.equals("director")));
+            parameters.put("title", Arrays.stream(strings).anyMatch(x->x.equals("title")));
+        }
+        else {
+            parameters.put("director", false);
+            parameters.put("title", false);
+        }
+        return parameters;
+    }
     public Film updateFilm(Film film) {
         if (film == null) {
             throw new ValidationException("Фильм не может быть обновлен.");

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/films")
@@ -27,6 +28,12 @@ public class FilmController {
     @PostMapping()
     public Film create(@RequestBody Film film) {
         return filmService.createFilm(film);
+    }
+
+    @GetMapping("/search")
+    @ResponseBody
+    public List<Film> search(@RequestParam String query, @RequestParam Optional<String> by) {
+        return filmService.search(query, by.orElse(null));
     }
 
     @PutMapping()

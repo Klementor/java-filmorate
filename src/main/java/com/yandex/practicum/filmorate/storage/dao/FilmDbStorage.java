@@ -27,6 +27,13 @@ public class FilmDbStorage implements FilmStorage {
     private final GenresDbStorage genresDbStorage;
     private final DirectorDbStorage directorDbStorage;
 
+    private static final String FILMS_TABLE = "\"FILM\"";
+    private static final String MPA_TABLE = "\"MPA\"";
+    private static final String FILM_GENRES_TABLE = "\"FILM_GENRE\"";
+    private static final String GENRES_TABLE = "\"GENRE\"";
+    private static final String FILM_LIKES_TABLE = "\"FILM_LIKES\"";
+    private static final String DIRECTOR_TABLE = "\"DIRECTOR\"";
+    private static final String DIRECTORS_TABLE = "\"DIRECTORS\"";
 
     @Override
     public List<Film> getFilms() {
@@ -85,6 +92,37 @@ public class FilmDbStorage implements FilmStorage {
             directorDbStorage.addDirectors(film.getId(), directors);
         }
         return film;
+    }
+
+    @Override
+    public List<Film> search(String query, Boolean director, Boolean title) {
+
+        query = "%" + query + "%";
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(" SELECT f.*, m.id AS mpa_id, m.name AS mpa_name ");
+        sb.append(" FROM " + FILMS_TABLE + " AS f ");
+        sb.append("\n INNER JOIN " + MPA_TABLE + " AS m ON f.mpa = m.id");
+        sb.append("\n LEFT JOIN " + DIRECTORS_TABLE + " d ON d.FILM_ID = f.ID");
+        sb.append("\n LEFT JOIN  " + DIRECTOR_TABLE + " d2 ON d2.DIRECTOR_ID = d.DIRECTOR_ID");
+
+        sb.append(director && title ?
+                "\n WHERE LOWER(f.name) LIKE LOWER(?) OR LOWER(d2.DIRECTOR_NAME) LIKE LOWER(?)" :
+                title ? "\n WHERE LOWER(f.name) LIKE LOWER(?)" :
+                        "\n WHERE LOWER(d2.DIRECTOR_NAME) LIKE LOWER(?)");
+
+        sb.append("\n ORDER BY d.FILM_ID DESC;");
+
+        List<Film> films = director && title ?
+                jdbcTemplate.query(sb.toString(), (rs, rowNum) -> makeFilm(rs), query, query) :
+                jdbcTemplate.query(sb.toString(), (rs, rowNum) -> makeFilm(rs), query);
+
+        films.forEach(film -> {
+            film.getGenres().addAll(genresDbStorage.getFilmGenres(film.getId()));
+            film.getLikes().addAll(getUserLikes(film.getId()));
+            film.getDirectors().addAll(directorDbStorage.getDirectorByFilmId(film.getId()));
+        });
+        return films;
     }
 
     @Override
