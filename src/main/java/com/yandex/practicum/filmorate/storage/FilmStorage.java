@@ -3,6 +3,7 @@ package com.yandex.practicum.filmorate.storage;
 import com.yandex.practicum.filmorate.model.Film;
 import com.yandex.practicum.filmorate.model.Like;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,7 +16,13 @@ public interface FilmStorage {
 
     Optional<Film> get(int filmId);
 
-    List<Film> getMostPopularFilms(int count);
+    List<Film> getMostPopularFilms(Integer count);
+
+    List<Film> getMostPopularFilmsWithGenreAndYear(Integer count, Integer genreId, Integer year);
+
+    List<Film> getMostPopularFilmsWithGenre(Integer count, Integer genreId);
+
+    List<Film> getMostPopularFilmsWithYear(Integer count, Integer year);
 
     void likeFilm(Film film, int userId);
 
