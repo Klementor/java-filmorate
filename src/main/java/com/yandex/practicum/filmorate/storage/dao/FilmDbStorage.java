@@ -1,9 +1,6 @@
 package com.yandex.practicum.filmorate.storage.dao;
 
-import com.yandex.practicum.filmorate.model.Director;
-import com.yandex.practicum.filmorate.model.Film;
-import com.yandex.practicum.filmorate.model.Genre;
-import com.yandex.practicum.filmorate.model.Mpa;
+import com.yandex.practicum.filmorate.model.*;
 import com.yandex.practicum.filmorate.storage.FilmStorage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -208,6 +205,11 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query(select, (rs, rowNum) -> rs.getInt("user_id"), filmId);
     }
 
+    public List<Like> getAllLikes() {
+        return jdbcTemplate.query("SELECT *" +
+                "FROM film_likes", new LikeMapper());
+    }
+
     private Film makeFilm(ResultSet rs) throws SQLException {
         int id = rs.getInt("id");
         Film film = Film.builder()
@@ -227,5 +229,16 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void removeFilm(int filmId) {
         jdbcTemplate.update("DELETE FROM film WHERE ID=?", filmId);
+    }
+
+    static class LikeMapper implements RowMapper<Like> {
+
+        @Override
+        public Like mapRow(ResultSet rs, int rowNum) throws SQLException {
+            Like like = new Like();
+            like.setFilmId(rs.getInt("film_id"));
+            like.setUserId(rs.getInt("user_id"));
+            return like;
+        }
     }
 }

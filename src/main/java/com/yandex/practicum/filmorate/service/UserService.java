@@ -2,18 +2,18 @@ package com.yandex.practicum.filmorate.service;
 
 import com.yandex.practicum.filmorate.exeption.NotFoundException;
 import com.yandex.practicum.filmorate.exeption.ValidationException;
+import com.yandex.practicum.filmorate.model.Film;
 import com.yandex.practicum.filmorate.model.User;
+import com.yandex.practicum.filmorate.storage.FilmStorage;
 import com.yandex.practicum.filmorate.storage.UserStorage;
-import com.yandex.practicum.filmorate.utils.Util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserStorage userStorage;
+    private final FilmStorage filmStorage;
+    private final FilmService filmService;
     private int idGenerator = 0;
 
     public User createUser(User user) {
@@ -120,6 +122,53 @@ public class UserService {
     private int generatedId() {
         return ++idGenerator;
     }
+
+
+    public Set<Film> getRecommendation(int userId) {
+        Map<Integer, Set<Integer>> data = initializeData();
+        Map<Integer, Integer> similarsMap = getSimilarMap(userId, data);
+        Set<Integer> userFilmSet = data.get(userId);
+        Set<Film> recomSet = new HashSet<>();
+        AtomicLong count = new AtomicLong(0);
+        similarsMap.keySet()
+                .forEach(u -> {
+                    if (similarsMap.get(u) >= count.get()) {
+                        data.get(u).stream()
+                                .filter(f -> !userFilmSet.contains(f))
+                                .map(filmService::getFilm)
+                                .forEach(recomSet::add);
+                        count.set(similarsMap.get(u));
+                    }
+                });
+        return recomSet;
+    }
+
+    private Map<Integer, Integer> getSimilarMap(int userId, Map<Integer, Set<Integer>> data) {
+        Map<Integer, Integer> similarLikesMap = new HashMap<>();
+        Set<Integer> userLikesSet = data.get(userId);
+        data.keySet().stream()
+                .filter(user -> !similarLikesMap.containsKey(user) && user != userId).forEach(user -> {
+                    Integer similar = (int) data.get(user).stream()
+                            .filter(userLikesSet::contains)
+                            .count();
+                    similarLikesMap.put(user, similar);
+                });
+
+        return similarLikesMap;
+    }
+
+    private Map<Integer, Set<Integer>> initializeData() {
+        Map<Integer, Set<Integer>> data = new HashMap<>();
+            filmStorage.getAllLikes().forEach(like -> {
+                if (!data.containsKey(like.getUserId())) {
+                    data.put(like.getUserId(), new HashSet<>());
+                }
+                data.get(like.getUserId()).add(like.getFilmId());
+            });
+        return data;
+    }
+
+
 
     public void deleteUser(int userId) {
         userStorage.getUserById(userId).orElseThrow(() -> {
