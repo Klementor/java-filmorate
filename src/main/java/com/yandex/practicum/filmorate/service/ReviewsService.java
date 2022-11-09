@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -51,9 +52,10 @@ public class ReviewsService {
     }
 
     public Review delete(int id) {
-        Review reviewReturned = reviewsStorage.deleteReviewById(id);
-        userStorage.addHistoryEvent(reviewReturned.getUserId(), "REVIEW", "REMOVE", reviewReturned.getReviewId());
-        return reviewReturned;
+        Optional<Review> reviewReturned = reviewsStorage.getReviewById(id);
+        reviewsStorage.deleteReviewById(id);
+        userStorage.addHistoryEvent(reviewReturned.get().getUserId(), "REVIEW", "REMOVE", reviewReturned.get().getReviewId());
+        return reviewReturned.get();
     }
 
     public List<Review> getReviewsByFilm(String filmIdStr, String countStr) {
