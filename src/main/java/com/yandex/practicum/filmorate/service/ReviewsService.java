@@ -29,18 +29,18 @@ public class ReviewsService {
             throw new NotFoundException("Пользователя с id = " + review.getUserId() + " не существует.");
         });
 
-        filmStorage.get(review.getFilmId()).orElseThrow(() -> {
+        filmStorage.getFilmById(review.getFilmId()).orElseThrow(() -> {
             throw new NotFoundException("Фильм с id = " + review.getFilmId() + " не существует.");
         });
 
-        Review reviewReturned = reviewsStorage.create(review);
+        Review reviewReturned = reviewsStorage.createReview(review);
         userStorage.addHistoryEvent(review.getUserId(), "REVIEW", "ADD", reviewReturned.getReviewId());
         return reviewReturned;
     }
 
     public Review updateReview(Review review) {
         validationReview(review);
-        Review reviewReturned = reviewsStorage.update(review);
+        Review reviewReturned = reviewsStorage.updateReview(review);
         userStorage.addHistoryEvent(reviewReturned.getUserId(), "REVIEW", "UPDATE", reviewReturned.getReviewId());
         return reviewReturned;
     }

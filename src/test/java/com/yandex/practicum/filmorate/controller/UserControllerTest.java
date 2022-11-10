@@ -36,81 +36,81 @@ class UserControllerTest {
 
     @Test
     void shouldExceptionWithNull() {
-        ValidationException ex = assertThrows(ValidationException.class, () -> userController.create(null));
-        Assertions.assertEquals("Пользователь не может быть создан.", ex.getMessage());
+        ValidationException ex = assertThrows(ValidationException.class, () -> userController.createUser(null));
+        assertEquals("Пользователь не может быть создан.", ex.getMessage());
     }
 
     @Test
     void shouldExceptionWithEmptyLogin() {
         template.setLogin("");
-        ValidationException ex = assertThrows(ValidationException.class, () -> userController.create(template));
-        Assertions.assertEquals("Логин не может быть пустым.", ex.getMessage());
+        ValidationException ex = assertThrows(ValidationException.class, () -> userController.createUser(template));
+        assertEquals("Логин не может быть пустым.", ex.getMessage());
     }
 
     @Test
     void shouldExceptionWithIncorrectLogin() {
         template.setLogin("l o g i n");
-        ValidationException ex = assertThrows(ValidationException.class, () -> userController.create(template));
+        ValidationException ex = assertThrows(ValidationException.class, () -> userController.createUser(template));
         Assertions.assertEquals("Некорректный логин l o g i n.", ex.getMessage());
     }
 
     @Test
     void shouldExceptionWithEmptyEmail() {
         template.setEmail("");
-        ValidationException ex = assertThrows(ValidationException.class, () -> userController.create(template));
+        ValidationException ex = assertThrows(ValidationException.class, () -> userController.createUser(template));
         Assertions.assertEquals("Некорректный адрес электронной почты .", ex.getMessage());
     }
 
     @Test
     void shouldExceptionWithIncorrectEmail() {
         template.setEmail("4dsadasdas");
-        ValidationException ex = assertThrows(ValidationException.class, () -> userController.create(template));
+        ValidationException ex = assertThrows(ValidationException.class, () -> userController.createUser(template));
         Assertions.assertEquals("Некорректный адрес электронной почты 4dsadasdas.", ex.getMessage());
     }
 
     @Test
     void shouldExceptionWithIncorrectBirthday() {
         template.setBirthday(LocalDate.of(2200, 10, 10));
-        ValidationException ex = assertThrows(ValidationException.class, () -> userController.create(template));
+        ValidationException ex = assertThrows(ValidationException.class, () -> userController.createUser(template));
         Assertions.assertEquals("Неверная дата рождения 2200-10-10.", ex.getMessage());
     }
 
     @Test
     void shouldExceptionUpdateWithNonContainsId() {
         template.setId(-1);
-        NotFoundException ex = assertThrows(NotFoundException.class, () -> userController.update(template));
+        NotFoundException ex = assertThrows(NotFoundException.class, () -> userController.updateUser(template));
         Assertions.assertEquals("Пользователь не существует.", ex.getMessage());
     }
 
     @Test
     void shouldNotExceptionWithEmptyName() {
         template.setName("");
-        User user = userController.create(template);
+        User user = userController.createUser(template);
         assertEquals(user.getName(), user.getLogin());
     }
 
     @Test
     void shouldCorrectUserReturn() {
-        User user = userController.create(template);
-        User returned = userController.getUser(user.getId());
+        User user = userController.createUser(template);
+        User returned = userController.getUserById(user.getId());
         assertNotNull(returned);
 
     }
 
     @Test
     void shouldExceptionWithNotFoundUser() {
-        NotFoundException ex = assertThrows(NotFoundException.class, () -> userController.getUser(-1));
+        NotFoundException ex = assertThrows(NotFoundException.class, () -> userController.getUserById(-1));
         Assertions.assertEquals("Пользователя с id = " + -1 + " не существует.", ex.getMessage());
     }
 
     @Test
     void shouldCorrectUserAddFriend() {
-        User created = userController.create(template);
-        User friend = userController.create(createFriend());
+        User created = userController.createUser(template);
+        User friend = userController.createUser(createFriend());
         userController.addToFriends(created.getId(), friend.getId());
 
-        User returnedFr = userController.getUser(friend.getId());
-        User returnedUs = userController.getUser(created.getId());
+        User returnedFr = userController.getUserById(friend.getId());
+        User returnedUs = userController.getUserById(created.getId());
 
         assertEquals(returnedFr.getFriends().size(), 0);
         assertFalse(returnedFr.getFriends().contains(created.getId()));
@@ -119,15 +119,15 @@ class UserControllerTest {
 
     @Test
     void shouldExceptionAddToFriendNotFoundUser() {
-        User created = userController.create(template);
+        User created = userController.createUser(template);
         NotFoundException ex = assertThrows(NotFoundException.class, () -> userController.addToFriends(created.getId(), -6));
         Assertions.assertEquals("Пользователя с id = " + -6 + " не существует.", ex.getMessage());
     }
 
     @Test
     void shouldCorrectUserRemoveFriend() {
-        User created = userController.create(template);
-        User friend = userController.create(createFriend());
+        User created = userController.createUser(template);
+        User friend = userController.createUser(createFriend());
         userController.addToFriends(created.getId(), friend.getId());
         userController.removeFromFriends(created.getId(), friend.getId());
 
@@ -139,34 +139,34 @@ class UserControllerTest {
 
     @Test
     void shouldExceptionRemoveFriendNotFoundUser() {
-        User created = userController.create(template);
+        User created = userController.createUser(template);
         NotFoundException ex = assertThrows(NotFoundException.class, () -> userController.removeFromFriends(created.getId(), -6));
         Assertions.assertEquals("Пользователя с id = " + -6 + " не существует.", ex.getMessage());
     }
 
     @Test
     void shouldCorrectUserFriendReturn() {
-        User created = userController.create(template);
-        User friend = userController.create(createFriend());
+        User created = userController.createUser(template);
+        User friend = userController.createUser(createFriend());
         userController.addToFriends(created.getId(), friend.getId());
 
-        User returned = userController.getUser(created.getId());
+        User returned = userController.getUserById(created.getId());
         assertTrue(returned.getFriends().contains(friend.getId()));
         assertEquals(returned.getFriends().size(), 1);
     }
 
     @Test
     void shouldEmptyUserFriendReturn() {
-        User created = userController.create(template);
+        User created = userController.createUser(template);
         assertNotNull(created.getFriends());
         assertTrue(created.getFriends().isEmpty());
     }
 
     @Test
     void shouldCorrectUsersCommonFriendReturn() {
-        User created = userController.create(template);
-        User friend = userController.create(createFriend());
-        User common = userController.create(createFriend());
+        User created = userController.createUser(template);
+        User friend = userController.createUser(createFriend());
+        User common = userController.createUser(createFriend());
         userController.addToFriends(created.getId(), friend.getId());
         userController.addToFriends(created.getId(), common.getId());
         userController.addToFriends(friend.getId(), common.getId());

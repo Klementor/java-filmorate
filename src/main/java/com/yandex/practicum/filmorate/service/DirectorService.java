@@ -22,7 +22,7 @@ public class DirectorService {
         return directorStorage.getDirectors();
     }
 
-    public Director getDirector(int id) {
+    public Director getDirectorById(int id) {
         try {
             return directorStorage.getDirectorById(id);
         } catch (EmptyResultDataAccessException e) {
@@ -35,12 +35,12 @@ public class DirectorService {
     }
 
     public Director updateDirector(Director director) {
-        getDirector(director.getId());
+        getDirectorById(director.getId());
         return directorStorage.updateDirector(director);
     }
 
-    public void deleteDirector(int id) {
-        getDirector(id);
-        directorStorage.deleteDirector(id);
+    public void deleteDirectorById(int id) {
+        getDirectorById(id);
+        directorStorage.deleteDirectorById(id);
     }
 }

@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ReviewsStorage {
-    Review create(Review review);
+    Review createReview(Review review);
 
-    Review update(Review review);
+    Review updateReview(Review review);
 
     Optional<Review> getReviewById(int id);
 
-    Review deleteReviewById(int id);
+    void deleteReviewById(int id);
 
     List<Review> getReviewsByFilm(int filmId, int count);
 

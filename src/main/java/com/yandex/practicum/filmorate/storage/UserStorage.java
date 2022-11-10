@@ -11,17 +11,17 @@ public interface UserStorage {
 
     Optional<User> getUserById(int id);
 
-    User create(User user);
+    User createUser(User user);
 
-    Optional<User> update(User user);
+    Optional<User> updateUser(User user);
 
     void addToFriend(User targetUser, User friend);
 
     void removeFromFriend(User targetUser, User friend);
 
-    List<HistoryEvent> getFeeds(int id);
+    List<HistoryEvent> getFeedsByUserId(int id);
 
     void addHistoryEvent(int userId, String eventType, String operation, int entityId);
 
-    void deleteUser(int id);
+    void deleteUserById(int id);
 }

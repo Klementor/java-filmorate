@@ -7,7 +7,6 @@ import com.yandex.practicum.filmorate.model.HistoryEvent;
 import com.yandex.practicum.filmorate.model.User;
 import com.yandex.practicum.filmorate.storage.FilmStorage;
 import com.yandex.practicum.filmorate.storage.UserStorage;
-import com.yandex.practicum.filmorate.utils.Util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class UserService {
-
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
     private final FilmService filmService;
@@ -33,9 +31,8 @@ public class UserService {
             throw new ValidationException("Пользователь не может быть создан.");
         }
         validationUser(user);
-
         user.setId(generatedId());
-        return userStorage.create(user);
+        return userStorage.createUser(user);
     }
 
     public User updateUser(User user) {
@@ -47,10 +44,10 @@ public class UserService {
             throw new NotFoundException("Пользователь не существует.");
         }
         validationUser(user);
-        return userStorage.update(user).get();
+        return userStorage.updateUser(user).get();
     }
 
-    public User getUser(Integer userId) {
+    public User getUserById(Integer userId) {
         return userStorage.getUserById(userId).orElseThrow(() -> {
             throw new NotFoundException("Пользователя с id = " + userId + " не существует.");
         });
@@ -61,21 +58,21 @@ public class UserService {
     }
 
     public void addToFriends(int targetUserId, int friendId) {
-        User targetUser = getUser(targetUserId);
-        User friend = getUser(friendId);
+        User targetUser = getUserById(targetUserId);
+        User friend = getUserById(friendId);
         userStorage.addToFriend(targetUser, friend);
         userStorage.addHistoryEvent(targetUserId, "FRIEND", "ADD", friendId);
     }
 
     public void removeFromFriends(int targetUserId, int friendId) {
-        User targetUser = getUser(targetUserId);
-        User friend = getUser(friendId);
+        User targetUser = getUserById(targetUserId);
+        User friend = getUserById(friendId);
         userStorage.removeFromFriend(targetUser, friend);
         userStorage.addHistoryEvent(targetUserId, "FRIEND", "REMOVE", friendId);
     }
 
-    public List<User> getFriends(int userId) {
-        User user = getUser(userId);
+    public List<User> getFriendsByUserId(int userId) {
+        User user = getUserById(userId);
         return user.getFriends().stream()
                 .map(userStorage::getUserById)
                 .filter(Optional::isPresent)
@@ -84,8 +81,8 @@ public class UserService {
     }
 
     public List<User> getCommonFriends(int targetUserId, int otherUserId) {
-        User targetUser = getUser(targetUserId);
-        User otherUser = getUser(otherUserId);
+        User targetUser = getUserById(targetUserId);
+        User otherUser = getUserById(otherUserId);
         return targetUser.getFriends().stream().filter(id -> otherUser.getFriends().contains(id))
                 .map(userStorage::getUserById)
                 .filter(Optional::isPresent)
@@ -93,9 +90,35 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public List<HistoryEvent> getFeeds(int id) {
-        User user = getUser(id);
-        return userStorage.getFeeds(user.getId());
+    public List<HistoryEvent> getFeedsByUserId(int id) {
+        User user = getUserById(id);
+        return userStorage.getFeedsByUserId(user.getId());
+    }
+
+    public void deleteUserById(int userId) {
+        userStorage.getUserById(userId).orElseThrow(() -> {
+            throw new NotFoundException("Пользователя с id = " + userId + " не существует.");
+        });
+        userStorage.deleteUserById(userId);
+    }
+
+    public Set<Film> getRecommendationByUserId(int userId) {
+        Map<Integer, Set<Integer>> data = initializeData();
+        Map<Integer, Integer> similarMap = getSimilarMap(userId, data);
+        Set<Integer> userFilmSet = data.get(userId);
+        Set<Film> recommendationSet = new HashSet<>();
+        AtomicLong count = new AtomicLong(0);
+        similarMap.keySet()
+                .forEach(u -> {
+                    if (similarMap.get(u) >= count.get()) {
+                        data.get(u).stream()
+                                .filter(f -> !userFilmSet.contains(f))
+                                .map(filmService::getFilmById)
+                                .forEach(recommendationSet::add);
+                        count.set(similarMap.get(u));
+                    }
+                });
+        return recommendationSet;
     }
 
     private void validationUser(User user) {
@@ -132,26 +155,6 @@ public class UserService {
         return ++idGenerator;
     }
 
-
-    public Set<Film> getRecommendation(int userId) {
-        Map<Integer, Set<Integer>> data = initializeData();
-        Map<Integer, Integer> similarsMap = getSimilarMap(userId, data);
-        Set<Integer> userFilmSet = data.get(userId);
-        Set<Film> recomSet = new HashSet<>();
-        AtomicLong count = new AtomicLong(0);
-        similarsMap.keySet()
-                .forEach(u -> {
-                    if (similarsMap.get(u) >= count.get()) {
-                        data.get(u).stream()
-                                .filter(f -> !userFilmSet.contains(f))
-                                .map(filmService::getFilm)
-                                .forEach(recomSet::add);
-                        count.set(similarsMap.get(u));
-                    }
-                });
-        return recomSet;
-    }
-
     private Map<Integer, Integer> getSimilarMap(int userId, Map<Integer, Set<Integer>> data) {
         Map<Integer, Integer> similarLikesMap = new HashMap<>();
         Set<Integer> userLikesSet = data.get(userId);
@@ -175,14 +178,5 @@ public class UserService {
                 data.get(like.getUserId()).add(like.getFilmId());
             });
         return data;
-    }
-
-
-
-    public void deleteUser(int userId) {
-        userStorage.getUserById(userId).orElseThrow(() -> {
-            throw new NotFoundException("Пользователя с id = " + userId + " не существует.");
-        });
-        userStorage.deleteUser(userId);
     }
 }

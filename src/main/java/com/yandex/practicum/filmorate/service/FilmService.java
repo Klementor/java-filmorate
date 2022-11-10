@@ -27,10 +27,8 @@ public class FilmService {
 
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
-
     private final MpaStorage mpaStorage;
     private final GenresStorage genresStorage;
-
     private final DirectorStorage directorStorage;
     private int idGenerator = 0;
 
@@ -47,7 +45,7 @@ public class FilmService {
         fillFilmGenres(film);
         film.setId(generatedId());
         film.setMpa(mpa);
-        return filmStorage.create(film);
+        return filmStorage.createFilm(film);
     }
 
     public List<Film> search(String query, String by) {
@@ -60,29 +58,12 @@ public class FilmService {
         }
     }
 
-    private Map<String, Boolean> parseQueryBy(String by) {
-        int maximumParametersSize = 2;
-        Map<String, Boolean> parameters = new HashMap<>();
-        if (by != null) {
-            String[] strings = by.split(",");
-            if (strings.length > maximumParametersSize) {
-                throw new ValidationException("chosen search fields contains more parameters than expected");
-            }
-            parameters.put("director", Arrays.asList(strings).contains("director"));
-            parameters.put("title", Arrays.asList(strings).contains("title"));
-        } else {
-            parameters.put("director", false);
-            parameters.put("title", false);
-        }
-        return parameters;
-    }
-
     public Film updateFilm(Film film) {
         if (film == null) {
             throw new ValidationException("Фильм не может быть обновлен.");
         }
 
-        if (filmStorage.get(film.getId()).isEmpty()) {
+        if (filmStorage.getFilmById(film.getId()).isEmpty()) {
             log.warn("Фильм с id {} не существует.", film.getId());
             throw new NotFoundException("Фильм не существует.");
         }
@@ -93,11 +74,11 @@ public class FilmService {
                 });
         film.setMpa(mpa);
         fillFilmGenres(film);
-        return filmStorage.update(film);
+        return filmStorage.updateFilm(film);
     }
 
-    public Film getFilm(int id) {
-        return filmStorage.get(id).orElseThrow(() -> {
+    public Film getFilmById(int id) {
+        return filmStorage.getFilmById(id).orElseThrow(() -> {
             throw new NotFoundException("Фильм с id = " + id + " не существует.");
         });
     }
@@ -107,7 +88,7 @@ public class FilmService {
             throw new NotFoundException("Пользователя с id = " + userId + " не существует.");
         });
 
-        Film film = filmStorage.get(filmId).orElseThrow(() -> {
+        Film film = filmStorage.getFilmById(filmId).orElseThrow(() -> {
             throw new NotFoundException("Фильм с id = " + filmId + " не существует.");
         });
         filmStorage.likeFilm(film, userId);
@@ -119,7 +100,7 @@ public class FilmService {
             throw new NotFoundException("Пользователя с id = " + userId + " не существует.");
         });
 
-        Film film = filmStorage.get(filmId).orElseThrow(() -> {
+        Film film = filmStorage.getFilmById(filmId).orElseThrow(() -> {
             throw new NotFoundException("Фильм с id = " + filmId + " не существует.");
         });
 
@@ -161,6 +142,22 @@ public class FilmService {
         return filmStorage.getCommonFilms(userId, friendId);
     }
 
+    public List<Film> getSortedFilmsByParameter(int directorId, String sortBy) {
+        try {
+            directorStorage.getDirectorById(directorId);
+            return filmStorage.getSortedFilms(directorId, sortBy);
+        } catch (EmptyResultDataAccessException e) {
+            throw new NotFoundException("Режиссера с таким id не существует");
+        }
+    }
+
+    public void deleteFilmById(int id) {
+        filmStorage.getFilmById(id).orElseThrow(() -> {
+            throw new NotFoundException("Фильма с id = " + id + " не существует.");
+        });
+        filmStorage.removeFilmById(id);
+    }
+
     private void validationFilm(Film film) {
         if (film.getName().isBlank()) {
             log.warn("Название фильма пустое.");
@@ -171,7 +168,6 @@ public class FilmService {
             log.warn("Описание фильма слишком длинная. Максимальная длина - 200 символов.");
             throw new ValidationException("Описание фильма слишком длинная. Максимальная длина - 200 символов.");
         }
-
 
         if (film.getReleaseDate().isBefore(CINEMA_BIRTHDAY)) {
             log.warn("Релиз фильма раньше {}.", CINEMA_BIRTHDAY.format(Util.DATE_FORMAT));
@@ -200,23 +196,24 @@ public class FilmService {
         }
     }
 
-    public List<Film> getSortedFilms(int directorId, String sortBy) {
-        try {
-            directorStorage.getDirectorById(directorId);
-            return filmStorage.getSortedFilms(directorId, sortBy);
-        } catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException("Режиссера с таким id не существует");
-        }
-    }
-
     private int generatedId() {
         return ++idGenerator;
     }
 
-    public void deleteFilm(int id) {
-        filmStorage.get(id).orElseThrow(() -> {
-            throw new NotFoundException("Фильма с id = " + id + " не существует.");
-        });
-        filmStorage.removeFilm(id);
+    private Map<String, Boolean> parseQueryBy(String by) {
+        int maximumParametersSize = 2;
+        Map<String, Boolean> parameters = new HashMap<>();
+        if (by != null) {
+            String[] strings = by.split(",");
+            if (strings.length > maximumParametersSize) {
+                throw new ValidationException("chosen search fields contains more parameters than expected");
+            }
+            parameters.put("director", Arrays.asList(strings).contains("director"));
+            parameters.put("title", Arrays.asList(strings).contains("title"));
+        } else {
+            parameters.put("director", false);
+            parameters.put("title", false);
+        }
+        return parameters;
     }
 }

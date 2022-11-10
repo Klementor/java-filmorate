@@ -24,10 +24,9 @@ public class ReviewsDbStorage implements ReviewsStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public Review create(Review review) {
-        KeyHolder keyHolder = null;
+    public Review createReview(Review review) {
         String insert = "INSERT INTO reviews (content, positive, film_id, user_id) VALUES (?,?,?,?)";
-        keyHolder = new GeneratedKeyHolder();
+        KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(insert, new String[]{"id"});
             ps.setString(1, review.getContent());
@@ -36,12 +35,11 @@ public class ReviewsDbStorage implements ReviewsStorage {
             ps.setInt(4, review.getUserId());
             return ps;
         }, keyHolder);
-
         return getReviewById(Objects.requireNonNull(keyHolder.getKey()).intValue()).get();
     }
 
     @Override
-    public Review update(Review review) {
+    public Review updateReview(Review review) {
         String update = "UPDATE reviews SET content = ?, positive = ? WHERE id = ?";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -83,10 +81,9 @@ public class ReviewsDbStorage implements ReviewsStorage {
     }
 
     @Override
-    public Review deleteReviewById(int id) {
+    public void deleteReviewById(int id) {
         String delete = "DELETE FROM reviews WHERE id = ?";
         jdbcTemplate.update(delete, id);
-        return null;
     }
 
     @Override
@@ -124,9 +121,8 @@ public class ReviewsDbStorage implements ReviewsStorage {
     }
 
     private Review makeReview(ResultSet rs) throws SQLException {
-        int id = rs.getInt("id");
         return Review.builder()
-                .reviewId(id)
+                .reviewId(rs.getInt("id"))
                 .content(rs.getString("content"))
                 .isPositive(rs.getBoolean("positive"))
                 .userId(rs.getInt("user_id"))

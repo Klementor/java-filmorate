@@ -17,7 +17,7 @@ public interface DirectorStorage {
 
     Director updateDirector(Director director);
 
-    void deleteDirector(int id);
+    void deleteDirectorById(int id);
 
     void addDirectors(int id, Set<Integer> directorIds);
 }

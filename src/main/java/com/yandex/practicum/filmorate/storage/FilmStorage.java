@@ -10,12 +10,13 @@ import java.util.TreeSet;
 public interface FilmStorage {
     List<Film> getFilms();
 
-    Film create(Film film);
+    Film createFilm(Film film);
 
-    Film update(Film film);
+    Film updateFilm(Film film);
 
-    List<Film>  search(String query, Boolean director, Boolean title);
-    Optional<Film> get(int filmId);
+    List<Film> search(String query, Boolean director, Boolean title);
+
+    Optional<Film> getFilmById(int filmId);
 
     List<Film> getMostPopularFilms(Integer count);
 
@@ -29,12 +30,11 @@ public interface FilmStorage {
 
     void unlikeFilm(Film film, int userId);
 
-
     TreeSet<Film> getCommonFilms(int userId, int friendId);
 
     List<Film> getSortedFilms(int directorId, String sortBy);
 
-    void removeFilm(int filmId);
+    void removeFilmById(int filmId);
 
     List<Like> getAllLikes();
 }
