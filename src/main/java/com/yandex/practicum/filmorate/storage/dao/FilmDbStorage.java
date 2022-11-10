@@ -1,6 +1,7 @@
 package com.yandex.practicum.filmorate.storage.dao;
 
 import com.yandex.practicum.filmorate.model.*;
+import com.yandex.practicum.filmorate.model.comparator.FilmsComparator;
 import com.yandex.practicum.filmorate.storage.FilmStorage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,9 +28,6 @@ public class FilmDbStorage implements FilmStorage {
 
     private static final String FILMS_TABLE = "\"FILM\"";
     private static final String MPA_TABLE = "\"MPA\"";
-    private static final String FILM_GENRES_TABLE = "\"FILM_GENRE\"";
-    private static final String GENRES_TABLE = "\"GENRE\"";
-    private static final String FILM_LIKES_TABLE = "\"FILM_LIKES\"";
     private static final String DIRECTOR_TABLE = "\"DIRECTOR\"";
     private static final String DIRECTORS_TABLE = "\"DIRECTORS\"";
 

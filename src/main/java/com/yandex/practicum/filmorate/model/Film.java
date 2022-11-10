@@ -23,7 +23,6 @@ public class Film {
     private LocalDate releaseDate;
     @NonNull
     private int duration;
-    @NonNull
     private Mpa mpa;
     private final Set<Director> directors = new HashSet<>();
     private final Set<Integer> likes = new HashSet<>();
