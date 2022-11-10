@@ -11,5 +11,5 @@ public class HistoryEvent {
     private String eventType;
     private String operation;
     private int entityId;
-    private int timestamp;
+    private long timestamp;
 }

@@ -41,7 +41,7 @@ public class ReviewsService {
     public Review updateReview(Review review) {
         validationReview(review);
         Review reviewReturned = reviewsStorage.update(review);
-        userStorage.addHistoryEvent(review.getUserId(), "REVIEW", "UPDATE", reviewReturned.getReviewId());
+        userStorage.addHistoryEvent(reviewReturned.getUserId(), "REVIEW", "UPDATE", reviewReturned.getReviewId());
         return reviewReturned;
     }
 

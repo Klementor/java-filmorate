@@ -96,7 +96,7 @@ public class UserDbStorage implements UserStorage {
     @Override
     public void addHistoryEvent(int userId, String eventType, String operation, int entityId) {
         String insert = "INSERT INTO history_event (user_id, event_type, operation, entity_id, timestamp) VALUES ( ?, ?, ?, ?, ?)";
-        jdbcTemplate.update(insert, userId, eventType, operation, entityId, Instant.now().getEpochSecond());
+        jdbcTemplate.update(insert, userId, eventType, operation, entityId, System.currentTimeMillis());
     }
 
     private User makeUser(ResultSet rs) throws SQLException {
@@ -117,7 +117,7 @@ public class UserDbStorage implements UserStorage {
                                 rs.getString("event_type"),
                                 rs.getString("operation"),
                                 rs.getInt("entity_id"),
-                                rs.getInt("timestamp"));
+                                rs.getLong("timestamp"));
     }
 
     @Override

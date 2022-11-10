@@ -101,5 +101,5 @@ CREATE TABLE IF NOT EXISTS history_event (
     event_type varchar(10) NOT NULL,
     operation varchar(10) NOT NULL,
     entity_id INTEGER NOT NULL,
-    timestamp INTEGER NOT NULL
+    timestamp BIGINT NOT NULL
 );
