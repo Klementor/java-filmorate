@@ -111,7 +111,7 @@ public class FilmService {
             throw new NotFoundException("Фильм с id = " + filmId + " не существует.");
         });
         filmStorage.likeFilm(film, userId);
-
+        userStorage.addHistoryEvent(userId, "LIKE", "ADD", filmId);
     }
 
     public void unlikeFilm(int userId, int filmId) {
@@ -124,6 +124,7 @@ public class FilmService {
         });
 
         filmStorage.unlikeFilm(film, userId);
+        userStorage.addHistoryEvent(userId, "LIKE", "REMOVE", filmId);
 
     }
 

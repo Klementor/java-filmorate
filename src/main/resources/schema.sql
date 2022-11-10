@@ -9,6 +9,7 @@ DROP TABLE IF EXISTS director CASCADE;
 DROP TABLE IF EXISTS directors CASCADE;
 DROP TABLE IF EXISTS reviews CASCADE;
 DROP TABLE IF EXISTS review_reactions CASCADE;
+DROP TABLE IF EXISTS history_event CASCADE;
 
 CREATE TABLE IF NOT EXISTS users
 (
@@ -92,4 +93,13 @@ CREATE TABLE IF NOT EXISTS review_reactions
     user_id   INTEGER REFERENCES users (id) ON DELETE CASCADE,
     review_id INTEGER REFERENCES reviews (id) ON DELETE CASCADE,
     reaction  INTEGER DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS history_event (
+    event_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    user_id INTEGER REFERENCES users (id) ON DELETE CASCADE,
+    event_type varchar(10) NOT NULL,
+    operation varchar(10) NOT NULL,
+    entity_id INTEGER NOT NULL,
+    timestamp BIGINT NOT NULL
 );
