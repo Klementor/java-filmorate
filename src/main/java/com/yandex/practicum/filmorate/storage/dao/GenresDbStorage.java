@@ -73,9 +73,6 @@ public class GenresDbStorage implements GenresStorage {
                     }
 
                 });
-
-//        String insert = "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)";
-//        jdbcTemplate.update(insert, filmId, genreId);
     }
 
     @Override
@@ -99,11 +96,15 @@ public class GenresDbStorage implements GenresStorage {
 
     @Override
     public List<Genre> getFilmGenres(int filmId) {
-        String select = "SELECT * \n" +
-                "FROM genre \n" +
-                "INNER JOIN film_genre ON film_genre.genre_id = genre.id\n" +
-                "AND film_genre.film_id = ?";
-        return jdbcTemplate.query(select, (rs, rowNum) -> makeGenre(rs), filmId);
+        try {
+            String select = "SELECT * " +
+                    "FROM genre " +
+                    "INNER JOIN film_genre ON film_genre.genre_id = genre.id " +
+                    "AND film_genre.film_id = ?";
+            return jdbcTemplate.query(select, (rs, rowNum) -> makeGenre(rs), filmId);
+        } catch (Throwable e) {
+            return null;
+        }
     }
 
 

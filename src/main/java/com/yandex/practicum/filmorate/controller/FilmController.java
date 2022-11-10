@@ -7,7 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 import java.util.Set;
+
+import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/films")
@@ -28,6 +32,12 @@ public class FilmController {
     @PostMapping()
     public Film create(@RequestBody Film film) {
         return filmService.createFilm(film);
+    }
+
+    @GetMapping("/search")
+    @ResponseBody
+    public List<Film> search(@RequestParam String query, @RequestParam Optional<String> by) {
+        return filmService.search(query, by.orElse(null));
     }
 
     @PutMapping()
@@ -51,12 +61,22 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getPopularFilms(@RequestParam(required = false) String count) {
-        return filmService.getMostPopularFilms(count);
+    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10", required = false) Integer count,
+                                      @RequestParam (required = false) Integer genreId,
+                                      @RequestParam (required = false) Integer year) {
+        return filmService.getMostPopularFilms(count, genreId, year);
     }
 
     @GetMapping("/common")
     public Set<Film> getCommonFilms(@RequestParam int userId, @RequestParam int friendId) {
         return filmService.getCommonFilms(userId, friendId);
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> getSortedFilms(@PathVariable int directorId, @RequestParam String sortBy) {
+        return filmService.getSortedFilms(directorId, sortBy);
+    }
+    @DeleteMapping("/{id}")
+    public void deleteFilm(@PathVariable int id) {
+        filmService.deleteFilm(id);
     }
 }
