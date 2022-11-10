@@ -16,7 +16,7 @@ import java.util.List;
 public class MpaService {
     private final MpaStorage mpaStorage;
 
-    public Mpa getMpa(int id) {
+    public Mpa getMpaById(int id) {
         return mpaStorage.getMpaById(id).orElseThrow(() -> {
             throw new NotFoundException("Рейтинг с id = " + id + " не существует.");
         });

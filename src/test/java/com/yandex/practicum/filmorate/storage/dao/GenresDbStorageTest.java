@@ -33,7 +33,7 @@ class GenresDbStorageTest {
     public void createFilm() {
         template = new Film(0, "name", "descr",
                 LocalDate.of(2000, 10, 10), 10, new Mpa(1, "G"));
-        template = filmController.create(template);
+        template = filmController.createFilm(template);
     }
 
     @Test

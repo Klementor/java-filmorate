@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Set;
 
@@ -17,27 +18,26 @@ import java.util.Set;
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class UserController {
-
     private final UserService userService;
 
     @GetMapping()
-    public List<User> getAll() {
+    public List<User> getAllUsers() {
         return userService.getUsers();
     }
 
     @PostMapping()
-    public User create(@RequestBody User user) {
+    public User createUser(@Valid @RequestBody User user) {
         return userService.createUser(user);
     }
 
     @PutMapping()
-    public User update(@RequestBody User user) {
+    public User updateUser(@Valid @RequestBody User user) {
         return userService.updateUser(user);
     }
 
     @GetMapping("/{id}")
-    public User getUser(@PathVariable int id) {
-        return userService.getUser(id);
+    public User getUserById(@PathVariable int id) {
+        return userService.getUserById(id);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
@@ -51,8 +51,8 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends")
-    public List<User> getUserFriends(@PathVariable int id) {
-        return userService.getFriends(id);
+    public List<User> getUserFriendsById(@PathVariable int id) {
+        return userService.getFriendsByUserId(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
@@ -61,17 +61,17 @@ public class UserController {
     }
 
     @GetMapping("/{id}/feed")
-    public List<HistoryEvent> getUserFeeds(@PathVariable int id) {
-        return userService.getFeeds(id);
+    public List<HistoryEvent> getUserFeedsByUserId(@PathVariable int id) {
+        return userService.getFeedsByUserId(id);
     }
 
     @GetMapping("/{userId}/recommendations")
-    public Set<Film> getRecommendationsFilms(@PathVariable int userId) {
-        return userService.getRecommendation(userId);
+    public Set<Film> getRecommendationsFilmsByUserId(@PathVariable int userId) {
+        return userService.getRecommendationByUserId(userId);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable int id) {
-        userService.deleteUser(id);
+    public void deleteUserById(@PathVariable int id) {
+        userService.deleteUserById(id);
     }
 }

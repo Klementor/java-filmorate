@@ -40,7 +40,6 @@ public class GenresDbStorage implements GenresStorage {
             Genre genre = new Genre(
                     genreRow.getInt("id"),
                     genreRow.getString("name"));
-
             return Optional.of(genre);
         } else {
             return Optional.empty();
@@ -107,9 +106,7 @@ public class GenresDbStorage implements GenresStorage {
         }
     }
 
-
     private Genre makeGenre(ResultSet rs) throws SQLException {
         return new Genre(rs.getInt("id"), rs.getString("name"));
     }
 }
-

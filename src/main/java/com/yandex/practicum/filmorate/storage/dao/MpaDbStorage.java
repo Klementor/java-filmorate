@@ -32,7 +32,6 @@ public class MpaDbStorage implements MpaStorage {
             Mpa mpa = new Mpa(
                     mpaRow.getInt("id"),
                     mpaRow.getString("name"));
-
             return Optional.of(mpa);
         } else {
             return Optional.empty();

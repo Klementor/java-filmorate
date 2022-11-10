@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -17,27 +18,27 @@ public class ReviewsController {
     private final ReviewsService reviewsService;
 
     @PostMapping()
-    public Review create(@RequestBody Review review) {
+    public Review createReview(@Valid @RequestBody Review review) {
         return reviewsService.createReview(review);
     }
 
     @PutMapping()
-    public Review update(@RequestBody Review review) {
+    public Review updateReview(@Valid @RequestBody Review review) {
         return reviewsService.updateReview(review);
     }
 
     @GetMapping("/{id}")
-    public Review getReview(@PathVariable int id) {
+    public Review getReviewById(@PathVariable int id) {
         return reviewsService.getReview(id);
     }
 
     @DeleteMapping("/{id}")
-    public Review deleteReview(@PathVariable int id) {
+    public Review deleteReviewById(@PathVariable int id) {
         return reviewsService.delete(id);
     }
 
     @GetMapping()
-    public List<Review> getReviewsByFilm(@RequestParam(required = false) String filmId, @RequestParam(required = false) String count) {
+    public List<Review> getReviewsByFilmId(@RequestParam(required = false) String filmId, @RequestParam(required = false) String count) {
         return reviewsService.getReviewsByFilm(filmId, count);
     }
 
@@ -60,5 +61,4 @@ public class ReviewsController {
     public void userDeleteDislikeReview(@PathVariable int id, @PathVariable int userId) {
         reviewsService.userDislikeReview(id, userId, false);
     }
-
 }
