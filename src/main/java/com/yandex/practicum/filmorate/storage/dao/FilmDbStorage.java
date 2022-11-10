@@ -3,6 +3,7 @@ package com.yandex.practicum.filmorate.storage.dao;
 import com.yandex.practicum.filmorate.model.Film;
 import com.yandex.practicum.filmorate.model.Genre;
 import com.yandex.practicum.filmorate.model.Mpa;
+import com.yandex.practicum.filmorate.model.comparator.FilmsComparator;
 import com.yandex.practicum.filmorate.storage.FilmStorage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -125,8 +126,13 @@ public class FilmDbStorage implements FilmStorage {
         Set<Integer> usersId = new HashSet<>(getFilmsIdByUserLikes(userId));
         Set<Integer> friendsId = new HashSet<>(getFilmsIdByUserLikes(userId));
         usersId.retainAll(friendsId);
-        String select = "SELECT * FROM film WHERE film_id IN (?)";
-        return new TreeSet<>(jdbcTemplate.query(select, (rs, rowNum) -> makeFilm(rs), usersId));
+        String parameterId = usersId.stream().map(String::valueOf).collect(Collectors.joining(","));
+        String select = String.format("SELECT f.*, m.id AS mpa_id, m.name AS mpa_name " +
+                "FROM film AS f " +
+                "INNER JOIN mpa AS m ON f.mpa = m.id WHERE f.id IN (%s)", parameterId);
+        TreeSet<Film> films = new TreeSet<>(new FilmsComparator());
+        films.addAll(jdbcTemplate.query(select, (rs, rowNum) -> makeFilm(rs)));
+        return films;
     }
 
     private List<Integer> getFilmsIdByUserLikes(int userId) {

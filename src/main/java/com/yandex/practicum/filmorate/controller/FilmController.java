@@ -59,5 +59,4 @@ public class FilmController {
     public Set<Film> getCommonFilms(@RequestParam int userId, @RequestParam int friendId) {
         return filmService.getCommonFilms(userId, friendId);
     }
-
 }

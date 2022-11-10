@@ -101,7 +101,6 @@ public class FilmService {
         });
 
         filmStorage.unlikeFilm(film, userId);
-
     }
 
     public List<Film> getFilms() {
