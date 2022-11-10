@@ -157,6 +157,10 @@ public class FilmService {
         }
     }
 
+    public TreeSet<Film> getCommonFilms(int userId, int friendId) {
+        return filmStorage.getCommonFilms(userId, friendId);
+    }
+
     private void validationFilm(Film film) {
         if (film.getName().isBlank()) {
             log.warn("Название фильма пустое.");

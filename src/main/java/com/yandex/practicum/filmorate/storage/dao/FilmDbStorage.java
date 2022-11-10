@@ -1,6 +1,7 @@
 package com.yandex.practicum.filmorate.storage.dao;
 
 import com.yandex.practicum.filmorate.model.*;
+import com.yandex.practicum.filmorate.model.comparator.FilmsComparator;
 import com.yandex.practicum.filmorate.storage.FilmStorage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,10 +13,8 @@ import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.*;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component("filmStorage")
@@ -29,9 +28,6 @@ public class FilmDbStorage implements FilmStorage {
 
     private static final String FILMS_TABLE = "\"FILM\"";
     private static final String MPA_TABLE = "\"MPA\"";
-    private static final String FILM_GENRES_TABLE = "\"FILM_GENRE\"";
-    private static final String GENRES_TABLE = "\"GENRE\"";
-    private static final String FILM_LIKES_TABLE = "\"FILM_LIKES\"";
     private static final String DIRECTOR_TABLE = "\"DIRECTOR\"";
     private static final String DIRECTORS_TABLE = "\"DIRECTORS\"";
 
@@ -245,6 +241,24 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public TreeSet<Film> getCommonFilms(int userId, int friendId) {
+        Set<Integer> usersId = new HashSet<>(getFilmsIdByUserLikes(userId));
+        Set<Integer> friendsId = new HashSet<>(getFilmsIdByUserLikes(userId));
+        usersId.retainAll(friendsId);
+        String parameterId = usersId.stream().map(String::valueOf).collect(Collectors.joining(","));
+        String select = String.format("SELECT f.*, m.id AS mpa_id, m.name AS mpa_name " +
+                "FROM film AS f " +
+                "INNER JOIN mpa AS m ON f.mpa = m.id WHERE f.id IN (%s)", parameterId);
+        TreeSet<Film> films = new TreeSet<>(new FilmsComparator());
+        films.addAll(jdbcTemplate.query(select, (rs, rowNum) -> makeFilm(rs)));
+        return films;
+    }
+
+    private List<Integer> getFilmsIdByUserLikes(int userId) {
+        String select = "SELECT film_id FROM film_likes WHERE user_id = ?";
+        return jdbcTemplate.query(select, (rs, rowNum) -> rs.getInt("film_id"), userId);
+    }
+
     public List<Film> getSortedFilms(int directorId, String sortBy) {
         if ("year".equals(sortBy)) {
             String sqlQuery = "SELECT FILM.id, FILM.name, FILM.description, FILM.release_date, FILM.duration, MPA.id, MPA.name " +
@@ -298,7 +312,6 @@ public class FilmDbStorage implements FilmStorage {
             return film;
         }
     }
-
 
     private List<Integer> getUserLikes(int filmId) {
         String select = "SELECT user_id " +
