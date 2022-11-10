@@ -1,9 +1,7 @@
 package com.yandex.practicum.filmorate.controller;
 
 import com.yandex.practicum.filmorate.model.Genre;
-import com.yandex.practicum.filmorate.model.Mpa;
 import com.yandex.practicum.filmorate.service.GenresService;
-import com.yandex.practicum.filmorate.service.MpaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

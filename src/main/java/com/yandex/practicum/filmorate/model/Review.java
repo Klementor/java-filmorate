@@ -1,11 +1,6 @@
 package com.yandex.practicum.filmorate.model;
 
 import lombok.*;
-import org.springframework.format.annotation.DateTimeFormat;
-
-import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 
 @Data
 @AllArgsConstructor
