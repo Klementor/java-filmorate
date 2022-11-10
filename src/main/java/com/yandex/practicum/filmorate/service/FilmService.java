@@ -11,15 +11,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.relational.core.sql.In;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -27,7 +24,6 @@ import java.util.stream.Stream;
 public class FilmService {
     private static final LocalDate CINEMA_BIRTHDAY = LocalDate.of(1895, Month.DECEMBER, 28);
     private static final int MAX_FILM_DESCRIPTION_SIZE = 200;
-    private static final int DEFAULT_COUNT_POPULAR_FILMS = 10;
 
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
@@ -64,23 +60,23 @@ public class FilmService {
         }
     }
 
-    private  Map<String,Boolean>  parseQueryBy(String by) {
-        int maximumParametersSize =2;
-        Map<String,Boolean> parameters = new HashMap<>();
+    private Map<String, Boolean> parseQueryBy(String by) {
+        int maximumParametersSize = 2;
+        Map<String, Boolean> parameters = new HashMap<>();
         if (by != null) {
             String[] strings = by.split(",");
-            if ( strings.length > maximumParametersSize) {
+            if (strings.length > maximumParametersSize) {
                 throw new ValidationException("chosen search fields contains more parameters than expected");
             }
-            parameters.put("director", Arrays.stream(strings).anyMatch(x->x.equals("director")));
-            parameters.put("title", Arrays.stream(strings).anyMatch(x->x.equals("title")));
-        }
-        else {
+            parameters.put("director", Arrays.asList(strings).contains("director"));
+            parameters.put("title", Arrays.asList(strings).contains("title"));
+        } else {
             parameters.put("director", false);
             parameters.put("title", false);
         }
         return parameters;
     }
+
     public Film updateFilm(Film film) {
         if (film == null) {
             throw new ValidationException("Фильм не может быть обновлен.");
@@ -115,7 +111,7 @@ public class FilmService {
             throw new NotFoundException("Фильм с id = " + filmId + " не существует.");
         });
         filmStorage.likeFilm(film, userId);
-
+        userStorage.addHistoryEvent(userId, "LIKE", "ADD", filmId);
     }
 
     public void unlikeFilm(int userId, int filmId) {
@@ -128,6 +124,8 @@ public class FilmService {
         });
 
         filmStorage.unlikeFilm(film, userId);
+        userStorage.addHistoryEvent(userId, "LIKE", "REMOVE", filmId);
+
     }
 
     public List<Film> getFilms() {
@@ -140,18 +138,18 @@ public class FilmService {
     }
 
     public List<Film> getMostPopularFilms(Integer count, Integer genreId, Integer year) {
-        if (genreId == null && year == null){
+        if (genreId == null && year == null) {
             return filmStorage.getMostPopularFilms(count);
         } else if (genreId == null) {
             return filmStorage.getMostPopularFilmsWithYear(count, year);
         } else if (year == null) {
             return filmStorage.getMostPopularFilmsWithGenre(count, genreId);
         } else {
-            if (genresStorage.getGenres().get(genreId) == null){
+            if (genresStorage.getGenres().get(genreId) == null) {
                 log.warn("Жанр не найден.");
                 throw new ValidationException("Жанр не найден.");
             }
-            if (year < CINEMA_BIRTHDAY.getYear() || year > LocalDate.now().getYear()){
+            if (year < CINEMA_BIRTHDAY.getYear() || year > LocalDate.now().getYear()) {
                 log.warn("Год меньше {} или больше {}.", CINEMA_BIRTHDAY.getYear(), LocalDate.now().getYear());
                 throw new ValidationException("Год меньше " + CINEMA_BIRTHDAY.getYear() + " или больше " + LocalDate.now().getYear() + ".");
             }
@@ -184,11 +182,6 @@ public class FilmService {
             log.warn("Некорректная продолжительность фильма {}.", film.getDuration());
             throw new ValidationException("Некорректная продолжительность фильма " + film.getDuration() + ".");
         }
-
-        if (film.getMpa() == null) {
-            log.warn("Некорректный рейтинг фильма {}.", film.getMpa());
-            throw new ValidationException("Некорректный рейтинг фильма " + film.getMpa() + ".");
-        }
     }
 
     private void fillFilmGenres(Film film) {
@@ -215,6 +208,7 @@ public class FilmService {
             throw new NotFoundException("Режиссера с таким id не существует");
         }
     }
+
     private int generatedId() {
         return ++idGenerator;
     }
