@@ -9,6 +9,7 @@ import com.yandex.practicum.filmorate.storage.*;
 import com.yandex.practicum.filmorate.utils.Util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
@@ -50,7 +51,7 @@ public class FilmService {
 
     public List<Film> search(String query, String by) {
         Map<String, Boolean> queryParams = parseQueryBy(by);
-        if (query != null && !query.isEmpty()) {
+        if (StringUtils.isNotBlank(query)) {
             return filmStorage.search(query, queryParams.get("director"), queryParams.get("title"));
         } else {
             log.warn("film search query is empty.");
@@ -127,7 +128,7 @@ public class FilmService {
             return filmStorage.getMostPopularFilmsWithGenre(count, genreId);
         } else {
             if (genresStorage.getGenres().get(genreId) == null) {
-                log.warn("Жанр не найден.");
+                log.warn("Жанр не найден, id = {}.", genreId);
                 throw new ValidationException("Жанр не найден.");
             }
             if (year < CINEMA_BIRTHDAY.getYear() || year > LocalDate.now().getYear()) {
@@ -138,7 +139,7 @@ public class FilmService {
         }
     }
 
-    public TreeSet<Film> getCommonFilms(int userId, int friendId) {
+    public Set<Film> getCommonFilms(int userId, int friendId) {
         return filmStorage.getCommonFilms(userId, friendId);
     }
 

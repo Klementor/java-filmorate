@@ -2,19 +2,17 @@ package com.yandex.practicum.filmorate.controller;
 
 import com.yandex.practicum.filmorate.model.Film;
 import com.yandex.practicum.filmorate.service.FilmService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Set;
 import java.util.Optional;
+import java.util.Set;
 
 
 @RestController
 @RequestMapping("/films")
-@Slf4j
 public class FilmController {
     private final FilmService filmService;
 
@@ -23,12 +21,12 @@ public class FilmController {
         this.filmService = filmService;
     }
 
-    @GetMapping()
+    @GetMapping
     public List<Film> getAllFilms() {
         return filmService.getFilms();
     }
 
-    @PostMapping()
+    @PostMapping
     public Film createFilm(@RequestBody Film film) {
         return filmService.createFilm(film);
     }
@@ -39,7 +37,7 @@ public class FilmController {
         return filmService.search(query, by.orElse(null));
     }
 
-    @PutMapping()
+    @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
         return filmService.updateFilm(film);
     }

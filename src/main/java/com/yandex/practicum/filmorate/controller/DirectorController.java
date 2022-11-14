@@ -3,8 +3,6 @@ package com.yandex.practicum.filmorate.controller;
 import com.yandex.practicum.filmorate.model.Director;
 import com.yandex.practicum.filmorate.service.DirectorService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -12,8 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/directors")
-@Slf4j
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 public class DirectorController {
     private final DirectorService directorService;
 

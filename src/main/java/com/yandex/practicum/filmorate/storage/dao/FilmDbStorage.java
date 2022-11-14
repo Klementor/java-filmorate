@@ -25,11 +25,6 @@ public class FilmDbStorage implements FilmStorage {
     private final GenresDbStorage genresDbStorage;
     private final DirectorDbStorage directorDbStorage;
 
-    private static final String FILMS_TABLE = "\"FILM\"";
-    private static final String MPA_TABLE = "\"MPA\"";
-    private static final String DIRECTOR_TABLE = "\"DIRECTOR\"";
-    private static final String DIRECTORS_TABLE = "\"DIRECTORS\"";
-
     @Override
     public List<Film> getFilms() {
         String select = "SELECT f.*, m.id AS mpa_id, m.name AS mpa_name " +
@@ -94,23 +89,19 @@ public class FilmDbStorage implements FilmStorage {
 
         query = "%" + query + "%";
 
-        StringBuilder sb = new StringBuilder();
-        sb.append(" SELECT f.*, m.id AS mpa_id, m.name AS mpa_name ");
-        sb.append(" FROM " + FILMS_TABLE + " AS f ");
-        sb.append("\n INNER JOIN " + MPA_TABLE + " AS m ON f.mpa = m.id");
-        sb.append("\n LEFT JOIN " + DIRECTORS_TABLE + " d ON d.FILM_ID = f.ID");
-        sb.append("\n LEFT JOIN  " + DIRECTOR_TABLE + " d2 ON d2.DIRECTOR_ID = d.DIRECTOR_ID");
-
-        sb.append(director && title ?
-                "\n WHERE LOWER(f.name) LIKE LOWER(?) OR LOWER(d2.DIRECTOR_NAME) LIKE LOWER(?)" :
-                title ? "\n WHERE LOWER(f.name) LIKE LOWER(?)" :
-                        "\n WHERE LOWER(d2.DIRECTOR_NAME) LIKE LOWER(?)");
-
-        sb.append("\n ORDER BY d.FILM_ID DESC;");
+        String select = "SELECT f.*, m.id AS mpa_id, m.name AS mpa_name " +
+                "FROM FILM AS f " +
+                "INNER JOIN MPA AS m ON f.mpa = m.id " +
+                "LEFT JOIN DIRECTORS d ON d.FILM_ID = f.ID " +
+                "LEFT JOIN DIRECTOR d2 ON d2.DIRECTOR_ID = d.DIRECTOR_ID " +
+                ((director && title) ? ("WHERE LOWER(f.name) LIKE LOWER(?) OR LOWER(d2.DIRECTOR_NAME) LIKE LOWER(?) ") :
+                (title) ? ("WHERE LOWER(f.name) LIKE LOWER(?) ") :
+                        ("WHERE LOWER(d2.DIRECTOR_NAME) LIKE LOWER(?) ")) +
+                "ORDER BY d.FILM_ID DESC";
 
         List<Film> films = director && title ?
-                jdbcTemplate.query(sb.toString(), (rs, rowNum) -> makeFilm(rs), query, query) :
-                jdbcTemplate.query(sb.toString(), (rs, rowNum) -> makeFilm(rs), query);
+                jdbcTemplate.query(select, (rs, rowNum) -> makeFilm(rs), query, query) :
+                jdbcTemplate.query(select, (rs, rowNum) -> makeFilm(rs), query);
 
         films.forEach(film -> {
             film.getGenres().addAll(genresDbStorage.getFilmGenres(film.getId()));
@@ -257,13 +248,8 @@ public class FilmDbStorage implements FilmStorage {
 
     public List<Film> getSortedFilms(int directorId, String sortBy) {
         if ("year".equals(sortBy)) {
-            String sqlQuery = "SELECT FILM.id, " +
-                    "FILM.name, " +
-                    "FILM.description, " +
-                    "FILM.release_date, " +
-                    "FILM.duration, " +
-                    "MPA.id, " +
-                    "MPA.name " +
+            String sqlQuery = "SELECT FILM.*, " +
+                    "MPA.* " +
                     "FROM film " +
                     "JOIN mpa ON mpa.id=FILM.MPA " +
                     "JOIN directors ON FILM.id=DIRECTORS.film_id " +
@@ -277,13 +263,8 @@ public class FilmDbStorage implements FilmStorage {
             }
             return films;
         } else if ("likes".equals(sortBy)) {
-            String sqlQuery = "SELECT FILM.id, " +
-                    "FILM.name, " +
-                    "FILM.description, " +
-                    "FILM.release_date, " +
-                    "FILM.duration, " +
-                    "MPA.id, " +
-                    "MPA.name, " +
+            String sqlQuery = "SELECT FILM.*, " +
+                    "MPA.*, " +
                     "COUNT(FILM_LIKES.user_id) " +
                     "FROM FILM " +
                     "Left JOIN FILM_LIKES ON FILM.id=FILM_LIKES.film_id " +

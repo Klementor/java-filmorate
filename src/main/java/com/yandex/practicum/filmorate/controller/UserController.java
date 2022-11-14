@@ -1,12 +1,10 @@
 package com.yandex.practicum.filmorate.controller;
 
-import com.yandex.practicum.filmorate.model.HistoryEvent;
 import com.yandex.practicum.filmorate.model.Film;
+import com.yandex.practicum.filmorate.model.HistoryEvent;
 import com.yandex.practicum.filmorate.model.User;
 import com.yandex.practicum.filmorate.service.UserService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -15,22 +13,21 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/users")
-@Slf4j
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
 
-    @GetMapping()
+    @GetMapping
     public List<User> getAllUsers() {
         return userService.getUsers();
     }
 
-    @PostMapping()
+    @PostMapping
     public User createUser(@Valid @RequestBody User user) {
         return userService.createUser(user);
     }
 
-    @PutMapping()
+    @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
         return userService.updateUser(user);
     }

@@ -3,8 +3,6 @@ package com.yandex.practicum.filmorate.controller;
 import com.yandex.practicum.filmorate.model.Review;
 import com.yandex.practicum.filmorate.service.ReviewsService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -12,17 +10,16 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/reviews")
-@Slf4j
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 public class ReviewsController {
     private final ReviewsService reviewsService;
 
-    @PostMapping()
+    @PostMapping
     public Review createReview(@Valid @RequestBody Review review) {
         return reviewsService.createReview(review);
     }
 
-    @PutMapping()
+    @PutMapping
     public Review updateReview(@Valid @RequestBody Review review) {
         return reviewsService.updateReview(review);
     }
@@ -37,7 +34,7 @@ public class ReviewsController {
         return reviewsService.delete(id);
     }
 
-    @GetMapping()
+    @GetMapping
     public List<Review> getReviewsByFilmId(@RequestParam(required = false) String filmId, @RequestParam(required = false) String count) {
         return reviewsService.getReviewsByFilm(filmId, count);
     }
