@@ -3,7 +3,6 @@ package com.yandex.practicum.filmorate.storage.dao;
 import com.yandex.practicum.filmorate.model.Director;
 import com.yandex.practicum.filmorate.storage.DirectorStorage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -19,7 +18,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @Component("directorStorage")
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 public class DirectorDbStorage implements DirectorStorage {
 
     private final JdbcTemplate jdbcTemplate;

@@ -4,7 +4,6 @@ import com.yandex.practicum.filmorate.model.*;
 import com.yandex.practicum.filmorate.storage.FilmStorage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -17,7 +16,7 @@ import java.time.LocalDate;
 import java.util.stream.Collectors;
 
 @Component("filmStorage")
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 @Slf4j
 public class FilmDbStorage implements FilmStorage {
 

@@ -7,16 +7,14 @@ import com.yandex.practicum.filmorate.storage.FilmStorage;
 import com.yandex.practicum.filmorate.storage.ReviewsStorage;
 import com.yandex.practicum.filmorate.storage.UserStorage;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
-@Slf4j
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 public class ReviewsService {
     private static final int DEFAULT_COUNT_REVIEWS = 10;
     private final ReviewsStorage reviewsStorage;
@@ -80,7 +78,7 @@ public class ReviewsService {
     }
 
     private void validationReview(Review review) {
-        if (review.getContent() == null || review.getContent().isBlank()) {
+        if (StringUtils.isBlank(review.getContent())) {
             throw new ValidationException("Тело отзыва пустое.");
         }
         if (review.getUserId() == null) {

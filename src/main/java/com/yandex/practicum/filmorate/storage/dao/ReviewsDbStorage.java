@@ -3,7 +3,6 @@ package com.yandex.practicum.filmorate.storage.dao;
 import com.yandex.practicum.filmorate.model.Review;
 import com.yandex.practicum.filmorate.storage.ReviewsStorage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -19,7 +18,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Component("reviewStorage")
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 public class ReviewsDbStorage implements ReviewsStorage {
     private final JdbcTemplate jdbcTemplate;
 

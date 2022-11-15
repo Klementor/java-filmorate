@@ -4,7 +4,6 @@ import com.yandex.practicum.filmorate.model.Genre;
 import com.yandex.practicum.filmorate.storage.GenresStorage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -21,7 +20,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component("genresStorage")
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 @Slf4j
 public class GenresDbStorage implements GenresStorage {
     private final JdbcTemplate jdbcTemplate;

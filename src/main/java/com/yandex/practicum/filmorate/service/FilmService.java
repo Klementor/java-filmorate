@@ -10,7 +10,6 @@ import com.yandex.practicum.filmorate.utils.Util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 public class FilmService {
     private static final LocalDate CINEMA_BIRTHDAY = LocalDate.of(1895, Month.DECEMBER, 28);
     private static final int MAX_FILM_DESCRIPTION_SIZE = 200;

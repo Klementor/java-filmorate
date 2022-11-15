@@ -4,7 +4,6 @@ import com.yandex.practicum.filmorate.model.HistoryEvent;
 import com.yandex.practicum.filmorate.model.User;
 import com.yandex.practicum.filmorate.storage.UserStorage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
@@ -16,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component("userStorage")
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;

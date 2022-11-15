@@ -5,7 +5,7 @@ import com.yandex.practicum.filmorate.model.Like;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.TreeSet;
+import java.util.Set;
 
 public interface FilmStorage {
     List<Film> getFilms();
@@ -30,7 +30,7 @@ public interface FilmStorage {
 
     void unlikeFilm(Film film, int userId);
 
-    TreeSet<Film> getCommonFilms(int userId, int friendId);
+    Set<Film> getCommonFilms(int userId, int friendId);
 
     List<Film> getSortedFilms(int directorId, String sortBy);
 

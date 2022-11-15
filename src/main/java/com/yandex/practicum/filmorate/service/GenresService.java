@@ -4,15 +4,12 @@ import com.yandex.practicum.filmorate.exeption.NotFoundException;
 import com.yandex.practicum.filmorate.model.Genre;
 import com.yandex.practicum.filmorate.storage.GenresStorage;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@Slf4j
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 public class GenresService {
     private final GenresStorage genresStorage;
 
