@@ -61,11 +61,13 @@ public class ReviewsService {
         if (countStr != null) {
             count = Integer.parseInt(countStr);
         }
-        int filmId = -1;
-        if (filmIdStr != null) {
-            filmId = Integer.parseInt(filmIdStr);
+
+        if (filmIdStr == null) {
+            return reviewsStorage.getReviewsWithoutFilm(count);
+        } else {
+            int filmId = Integer.parseInt(filmIdStr);
+            return reviewsStorage.getReviewsByFilm(filmId, count);
         }
-        return reviewsStorage.getReviewsByFilm(filmId, count);
     }
 
     public void userLikeReview(int id, int userId, boolean added) {

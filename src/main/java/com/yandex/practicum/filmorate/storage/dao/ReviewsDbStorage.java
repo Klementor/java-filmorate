@@ -87,10 +87,21 @@ public class ReviewsDbStorage implements ReviewsStorage {
 
     @Override
     public List<Review> getReviewsByFilm(int filmId, int count) {
-        String whereFilm = filmId == -1 ? "" : String.format("WHERE reviews.film_id = (%s) ", filmId);
         String select = "SELECT reviews.*, IFNULL(SUM(r.reaction), 0) as useful " +
                 "FROM reviews " +
-                "LEFT JOIN review_reactions AS r ON reviews.id = r.review_id " + whereFilm +
+                "LEFT JOIN review_reactions AS r ON reviews.id = r.review_id " +
+                "WHERE reviews.film_id = ? " +
+                "GROUP BY reviews.id " +
+                "ORDER BY useful DESC " +
+                "LIMIT ? ";
+        return jdbcTemplate.query(select, (rs, rowNum) -> makeReview(rs), filmId, count);
+    }
+
+    @Override
+    public List<Review> getReviewsWithoutFilm(int count) {
+        String select = "SELECT reviews.*, IFNULL(SUM(r.reaction), 0) as useful " +
+                "FROM reviews " +
+                "LEFT JOIN review_reactions AS r ON reviews.id = r.review_id " +
                 "GROUP BY reviews.id " +
                 "ORDER BY useful DESC " +
                 "LIMIT ? ";
