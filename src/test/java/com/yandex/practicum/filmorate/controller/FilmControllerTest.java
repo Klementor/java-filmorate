@@ -41,14 +41,14 @@ class FilmControllerTest {
 
     @Test
     void shouldExceptionWithNull() {
-        ValidationException ex = assertThrows(ValidationException.class, () -> filmController.create(null));
+        ValidationException ex = assertThrows(ValidationException.class, () -> filmController.createFilm(null));
         Assertions.assertEquals("Фильм не может быть создан.", ex.getMessage());
     }
 
     @Test
     void shouldExceptionWithEmptyName() {
         template.setName("");
-        ValidationException ex = assertThrows(ValidationException.class, () -> filmController.create(template));
+        ValidationException ex = assertThrows(ValidationException.class, () -> filmController.createFilm(template));
         Assertions.assertEquals("Название фильма пустое.", ex.getMessage());
 
     }
@@ -56,7 +56,7 @@ class FilmControllerTest {
     @Test
     void shouldExceptionWithTooLongDescription() {
         template.setDescription("d".repeat(201));
-        ValidationException ex = assertThrows(ValidationException.class, () -> filmController.create(template));
+        ValidationException ex = assertThrows(ValidationException.class, () -> filmController.createFilm(template));
         Assertions.assertEquals("Описание фильма слишком длинная. Максимальная длина - 200 символов.", ex.getMessage());
 
     }
@@ -64,7 +64,7 @@ class FilmControllerTest {
     @Test
     void shouldExceptionWithNegativeDuration() {
         template.setDuration(-100);
-        ValidationException ex = assertThrows(ValidationException.class, () -> filmController.create(template));
+        ValidationException ex = assertThrows(ValidationException.class, () -> filmController.createFilm(template));
         Assertions.assertEquals("Некорректная продолжительность фильма -100.", ex.getMessage());
 
     }
@@ -72,7 +72,7 @@ class FilmControllerTest {
     @Test
     void shouldExceptionWithIncorrectReleaseDay() {
         template.setReleaseDate(LocalDate.of(1600,10,10));
-        ValidationException ex = assertThrows(ValidationException.class, () -> filmController.create(template));
+        ValidationException ex = assertThrows(ValidationException.class, () -> filmController.createFilm(template));
         Assertions.assertEquals("Некорректная дата выхода фильма", ex.getMessage());
 
     }
@@ -80,7 +80,7 @@ class FilmControllerTest {
     @Test
     void shouldExceptionUpdateWithNonContainsId() {
         template.setId(-1);
-        NotFoundException ex = assertThrows(NotFoundException.class, () -> filmController.update(template));
+        NotFoundException ex = assertThrows(NotFoundException.class, () -> filmController.updateFilm(template));
         Assertions.assertEquals("Фильм не существует.", ex.getMessage());
 
     }
@@ -88,24 +88,24 @@ class FilmControllerTest {
 
     @Test
     void shouldCorrectLikeFilm() {
-        Film film = filmController.create(template);
+        Film film = filmController.createFilm(template);
         filmController.likeFilm(film.getId(), user.getId());
-        var returned = filmController.getFilm(film.getId());
+        var returned = filmController.getFilmById(film.getId());
         assertEquals(returned.getLikes().size(), 1);
         assertTrue(returned.getLikes().contains(user.getId()));
     }
 
     @Test
     void shouldEmptyLikeFilm() {
-        Film film = filmController.create(template);
-        var returned = filmController.getFilm(film.getId());
+        Film film = filmController.createFilm(template);
+        var returned = filmController.getFilmById(film.getId());
         assertNotNull(returned.getLikes());
         assertEquals(returned.getLikes().size(), 0);
     }
 
     @Test
     void shouldExceptionLikeFilmNotFoundUser() {
-        Film film = filmController.create(template);
+        Film film = filmController.createFilm(template);
         NotFoundException ex = assertThrows(NotFoundException.class, () -> filmController.likeFilm(film.getId(), -1));
         Assertions.assertEquals("Пользователя с id = " + -1 + " не существует.", ex.getMessage());
     }
@@ -118,7 +118,7 @@ class FilmControllerTest {
 
     @Test
     void shouldCorrectUnlikeFilm() {
-        Film film = filmController.create(template);
+        Film film = filmController.createFilm(template);
         filmController.likeFilm(film.getId(), user.getId());
         filmController.unlikeFilm(film.getId(), user.getId());
         assertNotNull(film.getLikes());
@@ -133,18 +133,17 @@ class FilmControllerTest {
 
     @Test
     void shouldExceptionUnlikeFilmNotFoundUser() {
-        Film film = filmController.create(template);
+        Film film = filmController.createFilm(template);
         NotFoundException ex = assertThrows(NotFoundException.class, () -> filmController.unlikeFilm(film.getId(), -1));
         Assertions.assertEquals("Пользователя с id = " + -1 + " не существует.", ex.getMessage());
     }
 
     @Test
     void shouldReturnPopularFilmsWithNullCount() {
-        Film film = filmController.create(template);
-        Film withoutLike = filmController.create(template);
+        Film film = filmController.createFilm(template);
 
         filmController.likeFilm(film.getId(), user.getId());
-        List<Film> films = filmController.getPopularFilms(null);
+        List<Film> films = filmController.getPopularFilms(null, null, null);
 
         assertNotNull(films);
         assertFalse(films.isEmpty());
@@ -152,11 +151,11 @@ class FilmControllerTest {
 
     @Test
     void shouldReturnPopularFilmsWithNonNullCount() {
-        Film film = filmController.create(template);
-        Film withoutLike = filmController.create(template);
+        Film film = filmController.createFilm(template);
+        Film withoutLike = filmController.createFilm(template);
 
         filmController.likeFilm(film.getId(), user.getId());
-        List<Film> films = filmController.getPopularFilms("1");
+        List<Film> films = filmController.getPopularFilms(1, null, null);
 
         assertEquals(1, films.size());
         assertFalse(films.contains(withoutLike));

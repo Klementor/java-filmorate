@@ -4,11 +4,8 @@ import com.yandex.practicum.filmorate.model.Genre;
 import com.yandex.practicum.filmorate.storage.GenresStorage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.relational.core.sql.In;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ParameterizedPreparedStatementSetter;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +20,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component("genresStorage")
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 @Slf4j
 public class GenresDbStorage implements GenresStorage {
     private final JdbcTemplate jdbcTemplate;
@@ -42,7 +39,6 @@ public class GenresDbStorage implements GenresStorage {
             Genre genre = new Genre(
                     genreRow.getInt("id"),
                     genreRow.getString("name"));
-
             return Optional.of(genre);
         } else {
             return Optional.empty();
@@ -75,10 +71,8 @@ public class GenresDbStorage implements GenresStorage {
                     }
 
                 });
-
-//        String insert = "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)";
-//        jdbcTemplate.update(insert, filmId, genreId);
     }
+
     @Override
     public void removeFilmGenres(int filmId, List<Integer> genreIds) {
         jdbcTemplate.batchUpdate(
@@ -100,16 +94,18 @@ public class GenresDbStorage implements GenresStorage {
 
     @Override
     public List<Genre> getFilmGenres(int filmId) {
-        String select = "SELECT * \n" +
-                "FROM genre \n" +
-                "INNER JOIN film_genre ON film_genre.genre_id = genre.id\n" +
-                "AND film_genre.film_id = ?";
-        return jdbcTemplate.query(select, (rs, rowNum) -> makeGenre(rs), filmId);
+        try {
+            String select = "SELECT * " +
+                    "FROM genre " +
+                    "INNER JOIN film_genre ON film_genre.genre_id = genre.id " +
+                    "AND film_genre.film_id = ?";
+            return jdbcTemplate.query(select, (rs, rowNum) -> makeGenre(rs), filmId);
+        } catch (Throwable e) {
+            return null;
+        }
     }
-
 
     private Genre makeGenre(ResultSet rs) throws SQLException {
         return new Genre(rs.getInt("id"), rs.getString("name"));
     }
 }
-

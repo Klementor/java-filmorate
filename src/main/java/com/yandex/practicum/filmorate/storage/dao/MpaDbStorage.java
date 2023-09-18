@@ -3,7 +3,6 @@ package com.yandex.practicum.filmorate.storage.dao;
 import com.yandex.practicum.filmorate.model.Mpa;
 import com.yandex.practicum.filmorate.storage.MpaStorage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
@@ -14,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component("mpaStorage")
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 public class MpaDbStorage implements MpaStorage {
     private final JdbcTemplate jdbcTemplate;
 
@@ -32,7 +31,6 @@ public class MpaDbStorage implements MpaStorage {
             Mpa mpa = new Mpa(
                     mpaRow.getInt("id"),
                     mpaRow.getString("name"));
-
             return Optional.of(mpa);
         } else {
             return Optional.empty();

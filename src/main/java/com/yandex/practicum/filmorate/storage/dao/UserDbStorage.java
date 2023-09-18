@@ -1,9 +1,9 @@
 package com.yandex.practicum.filmorate.storage.dao;
 
+import com.yandex.practicum.filmorate.model.HistoryEvent;
 import com.yandex.practicum.filmorate.model.User;
 import com.yandex.practicum.filmorate.storage.UserStorage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component("userStorage")
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
@@ -38,8 +38,7 @@ public class UserDbStorage implements UserStorage {
                     .name(userRow.getString("name"))
                     .birthday(userRow.getDate("birthday").toLocalDate())
                     .build();
-            user.getFriends().addAll(getUserFriends(id));
-
+            user.getFriends().addAll(getUserFriendsByUserId(id));
             return Optional.of(user);
         } else {
             return Optional.empty();
@@ -47,25 +46,29 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User create(User user) {
+    public User createUser(User user) {
         String insert = "INSERT INTO users (ID, EMAIL, LOGIN, NAME, BIRTHDAY) VALUES ( ?, ?, ?, ?, ?)";
-        jdbcTemplate.update(insert, user.getId(), user.getEmail(), user.getLogin(), user.getName(), Date.valueOf(user.getBirthday()));
+        jdbcTemplate.update(insert,
+                user.getId(),
+                user.getEmail(),
+                user.getLogin(),
+                user.getName(),
+                Date.valueOf(user.getBirthday()));
         return user;
     }
 
     @Override
-    public Optional<User> update(User user) {
+    public Optional<User> updateUser(User user) {
         String delete = "DELETE FROM users WHERE id = ?";
         String insert = "INSERT INTO users (id, email, login, name, birthday) VALUES ( ?, ?, ?, ?,?)";
-
         jdbcTemplate.update(delete, user.getId());
         jdbcTemplate.update(insert, user.getId(), user.getEmail(), user.getLogin(), user.getName(), user.getBirthday());
         return getUserById(user.getId());
     }
 
-    private List<Integer> getUserFriends(int userId) {
-        String select = "SELECT friends_id \n" +
-                "FROM user_friends \n" +
+    private List<Integer> getUserFriendsByUserId(int userId) {
+        String select = "SELECT friends_id " +
+                "FROM user_friends " +
                 "WHERE user_id = ?";
         return jdbcTemplate.query(select, (rs, rowNum) -> rs.getInt("friends_id"), userId);
     }
@@ -82,6 +85,26 @@ public class UserDbStorage implements UserStorage {
         jdbcTemplate.update(remove, targetUser.getId(), friend.getId());
     }
 
+    @Override
+    public List<HistoryEvent> getFeedsByUserId(int id) {
+        String select = "SELECT * " +
+                "FROM history_event " +
+                "WHERE user_id = ?";
+        return jdbcTemplate.query(select, (rs, rowNum) -> makeHistoryEvent(rs), id);
+    }
+
+    @Override
+    public void addHistoryEvent(int userId, String eventType, String operation, int entityId) {
+        String insert = "INSERT INTO history_event (user_id, event_type, operation, entity_id, timestamp) " +
+                "VALUES ( ?, ?, ?, ?, ?)";
+        jdbcTemplate.update(insert, userId, eventType, operation, entityId, System.currentTimeMillis());
+    }
+
+    @Override
+    public void deleteUserById(int id) {
+        jdbcTemplate.update("DELETE FROM users WHERE ID=?", id);
+    }
+
     private User makeUser(ResultSet rs) throws SQLException {
         int id = rs.getInt("id");
         User user = User.builder().id(id)
@@ -90,7 +113,16 @@ public class UserDbStorage implements UserStorage {
                 .name(rs.getString("name"))
                 .birthday(rs.getDate("birthday").toLocalDate())
                 .build();
-        user.getFriends().addAll(getUserFriends(id));
+        user.getFriends().addAll(getUserFriendsByUserId(id));
         return user;
+    }
+
+    private HistoryEvent makeHistoryEvent(ResultSet rs) throws SQLException {
+        return new HistoryEvent(rs.getInt("event_id"),
+                rs.getInt("user_id"),
+                rs.getString("event_type"),
+                rs.getString("operation"),
+                rs.getInt("entity_id"),
+                rs.getLong("timestamp"));
     }
 }
